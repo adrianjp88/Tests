@@ -1,0 +1,7 @@
+*.fig
+tests/GpuFit_cminpack/GpuFit_cminpack.mat
+*.mat
+tests/GpuFit_CpuFit_profile/GpuFit_CpuFit_speed.xls
+*.xlsx
+tests/GpuFit_GPULMFit_cminpack_precision/GpuFit_GPULMFit_cminpack_precision.xls
+*.xls
