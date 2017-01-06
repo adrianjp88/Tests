@@ -1,7 +1,7 @@
 function [] = GpuFit_CpuFit_profile()
 
 fit_size = 5;
-n_fits = 100000;
+n_fits = 5000000;
 
 sigma = ones(1,fit_size*fit_size);
 model_id = 1; %GAUSS_2D
@@ -127,6 +127,20 @@ filename = 'GpuFit_CpuFit_speed';
 %% save data
 save(filename);
 
+%% step identifier
+step_identifier = {...
+    'initialize LM',...
+    'allocate GPU memory',...
+    'copy data to GPU',...
+    'calculate fittting curve',...
+    'calculate Chi-square',...
+    'calculate gradient & hessian',...
+    'Gauss-Jordan elimination',...
+    'evaluate fit iteration',...
+    'read results from GPU',...
+    'get results',...
+    'free GPU memory'};
+
 %% write file
 xlsfilename = [filename '.xls'];
 
@@ -136,17 +150,7 @@ xlswrite(xlsfilename,Raw,1)
 xlscolumns = {'GpuFit' 'CpuFit'};
 xlswrite(xlsfilename,xlscolumns,1,'B1')
 
-xlsrows = {...
-    'step 1';...
-    'step 2';...
-    'step 3';...
-    'step 4';...
-    'step 5';...
-    'step 6';...
-    'step 7';...
-    'step 8';...
-    'step 9';...
-    'step 10'};
+xlsrows = step_identifier.';
 xlswrite(xlsfilename,xlsrows,1,'A2')
 
 xlsmat(:,1) = times_GpuFit;
@@ -156,12 +160,12 @@ xlswrite(xlsfilename,xlsmat,1,'B2')
 write_test_info(xlsfilename, info);
 
 %% plot
-Plot_GpuFit_CpuFit_times(times_GpuFit, times_CpuFit);
+Plot_GpuFit_CpuFit_times(times_GpuFit, times_CpuFit, step_identifier);
 savefig(filename)
 
 end
 
-function [] = Plot_GpuFit_CpuFit_times(times_GpuFit, times_CpuFit)
+function [] = Plot_GpuFit_CpuFit_times(times_GpuFit, times_CpuFit, identifier)
 
 times = [log10(single(times_GpuFit(1:10))+1) ; log10(single(times_CpuFit(1:10))+1)];
 b = barh(times.', 1);
@@ -169,7 +173,6 @@ set(b(1),'FaceColor','red');
 set(b(2),'FaceColor','blue');
 legend('GpuFit', 'CpuFit')
 
-specs = {'step 1','step 2','step 3','step 4','step 5','step 6','step 7','step 8','step 9','step 10',};
-set(gca,'yticklabel',specs)
+set(gca,'yticklabel',identifier)
 
 end

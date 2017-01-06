@@ -17,13 +17,13 @@ GPULMFit_path_32 = 'D:\Sources\MexFiles\32';
 
 %% paths to 64 bit mex files and dlls to set by user
 %-------------------------------------------------
-% win64 = 1;
-% GpuFit_path_64 = 'D:\Sources\MexFiles\64';
-% CpuFit_path_64 = 'D:\Sources\MexFiles\64';
-% GpuFit_profile_path_64 = 'D:\Sources\MexFiles\64';
-% CpuFit_profile_path_64 = 'D:\Sources\MexFiles\64';
-% cminapck_path_64 = 'D:\Sources\MexFiles\64';
-% GPULMFit_path_64 = ''; %non-existent
+win64 = 1;
+GpuFit_path_64 = 'D:\Sources\MexFiles\64';
+CpuFit_path_64 = 'D:\Sources\MexFiles\64';
+GpuFit_profile_path_64 = 'D:\Sources\MexFiles\64';
+CpuFit_profile_path_64 = 'D:\Sources\MexFiles\64';
+cminapck_path_64 = 'D:\Sources\MexFiles\64';
+GPULMFit_path_64 = ''; %non-existent
 %-------------------------------------------------
 
 
