@@ -1,6 +1,6 @@
 function [data] = generate_2Dgaussians(parameters, count, size)
 
-fprintf('generating data... ');
+% fprintf('generating data... ');
 
 a = parameters.a;
 x0 = parameters.x0;
@@ -38,6 +38,6 @@ for i = 1:count
         + b(i);
 end
 
-fprintf('done!\n');
+% fprintf('done!\n');
 
 end

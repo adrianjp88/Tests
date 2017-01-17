@@ -1,15 +1,9 @@
-function [precision] = calculate_precision(calculated, parameters, fit_valid_index)
+function [precision] = calculate_abs_precision(fit_results, data_parameters)
 
-    calc_a  = calculated.a(fit_valid_index);
-    calc_x0 = calculated.x0(fit_valid_index);
-    calc_y0 = calculated.y0(fit_valid_index);
-    calc_s  = calculated.s(fit_valid_index);
-    calc_b  = calculated.b(fit_valid_index);
-
-    precision.a = std(calc_a-parameters.a) / parameters.a;
-    precision.x0 = std(calc_x0-parameters.x0(fit_valid_index));
-    precision.y0 = std(calc_y0-parameters.y0(fit_valid_index));
-    precision.s = std(calc_s-parameters.s) / parameters.s;
-    precision.b = std(calc_b-parameters.b) / parameters.b;
+    precision.a = std(calc_a-data_parameters.a) / data_parameters.a;
+    precision.x0 = std(calc_x0-data_parameters.x0(fit_valid_index));
+    precision.y0 = std(calc_y0-data_parameters.y0(fit_valid_index));
+    precision.s = std(calc_s-data_parameters.s) / data_parameters.s;
+    precision.b = std(calc_b-data_parameters.b) / data_parameters.b;
 
 end
