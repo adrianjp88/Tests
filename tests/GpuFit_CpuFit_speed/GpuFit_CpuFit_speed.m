@@ -1,6 +1,6 @@
 function [] = GpuFit_CpuFit_speed()
 fit_size = 5;
-sigma = ones(1,fit_size*fit_size);
+sigma = [];
 model_id = 1; %GAUSS_2D
 estimator_id = 0; %LSE
 n_parameters = 5;
@@ -67,7 +67,7 @@ for i = 1:length(n_fits)
 
     %% run CpuFit
     [parameters_CpuFit, converged_CpuFit, chisquare_CpuFit, n_iterations_CpuFit, time_CpuFit]...
-        = CpuFit(data, sigma, max_iterations, initial_parameter_set, parameters_to_fit, model_id, estimator_id, tolerance, user_info);
+        = CpuFit(data, sigma, fit_size*fit_size, max_iterations, initial_parameter_set, parameters_to_fit, model_id, estimator_id, tolerance, user_info);
     converged_CpuFit = converged_CpuFit + 1;
     calculated.a = parameters_CpuFit(1:n_parameters:end).';
     calculated.x0 = parameters_CpuFit(2:n_parameters:end).';
@@ -84,7 +84,7 @@ for i = 1:length(n_fits)
       
     %% run GpuFit
     [parameters_GpuFit, converged_GpuFit, chisquare_GpuFit, n_iterations_GpuFit, time_GpuFit]...
-        = GpuFit(data, sigma, max_iterations, initial_parameter_set, parameters_to_fit, model_id, estimator_id, tolerance, user_info);
+        = GpuFit(data, sigma, fit_size*fit_size, max_iterations, initial_parameter_set, parameters_to_fit, model_id, estimator_id, tolerance, user_info);
     converged_GpuFit = converged_GpuFit + 1;
     calculated.a = parameters_GpuFit(1:n_parameters:end).';
     calculated.x0 = parameters_GpuFit(2:n_parameters:end).';

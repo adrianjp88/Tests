@@ -3,7 +3,7 @@ function [] = GpuFit_GPULMFit_cminpack_accuracy()
 n_fits = 100000;
 fit_size = 15;
 
-sigma = ones(1,fit_size*fit_size);
+sigma = [];
 
 model_id = 1; %GAUSS_2D
 estimator_id = 0; %LSE
@@ -64,7 +64,7 @@ data = permute(data,[2,1,3]);
 
 %% run GpuFit
 [parameters_GpuFit, converged_GpuFit, chisquare_GpuFit, n_iterations_GpuFit, time_GpuFit]...
-    = GpuFit(data, sigma, max_iterations, initial_parameters, parameters_to_fit, model_id, estimator_id, tolerance, user_info);
+    = GpuFit(data, sigma, fit_size*fit_size, max_iterations, initial_parameters, parameters_to_fit, model_id, estimator_id, tolerance, user_info);
 converged_GpuFit = converged_GpuFit + 1;
 calculated.a = parameters_GpuFit(1:n_curve_parameters:end).';
 calculated.x0 = parameters_GpuFit(2:n_curve_parameters:end).';
