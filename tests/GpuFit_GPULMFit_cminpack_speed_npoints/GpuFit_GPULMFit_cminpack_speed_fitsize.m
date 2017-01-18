@@ -19,7 +19,7 @@ for i = 1:length(fit_size)
     fprintf('fit size: %d\n', fit_size(i));
     
     %%set weight
-    sigma = [];
+    sigma = ones(1,fit_size(i)*fit_size(i));
     
     %% set start values
     initial_parameters = ones(1,n_parameters);
@@ -59,7 +59,7 @@ for i = 1:length(fit_size)
 
     %% run GpuFit
     [parameters_GpuFit, converged_GpuFit, chisquare_GpuFit, n_iterations_GpuFit, time_GpuFit]...
-        = GpuFit(data, sigma, fit_size*fit_size, max_iterations, initial_parameter_set, parameters_to_fit, model_id, estimator_id, tolerance, user_info);
+        = GpuFit(data, sigma, max_iterations, initial_parameter_set, parameters_to_fit, model_id, estimator_id, tolerance, user_info);
     converged_GpuFit = converged_GpuFit + 1;
     calculated.a = parameters_GpuFit(1:n_parameters:end).';
     calculated.x0 = parameters_GpuFit(2:n_parameters:end).';

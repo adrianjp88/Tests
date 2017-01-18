@@ -3,7 +3,7 @@ function [] = MLE_LSE()
 n_fits = 1000;
 fit_size = 15;
 
-sigma = [];
+sigma = ones(1,fit_size*fit_size);
 
 model_id = 1; %GAUSS_2D
 LSE = 0;
@@ -57,7 +57,7 @@ for i = 1:n_points
     
     %% run GpuFit MLE
     [curve_parameters_MLE, converged_MLE, chisquare_MLE, n_iterations_MLE, time_MLE]...
-        = GpuFit(data, sigma, fit_size*fit_size, max_iterations, start_values, parameters_to_fit, model_id, MLE, tolerance, user_info);
+        = GpuFit(data, sigma, max_iterations, start_values, parameters_to_fit, model_id, MLE, tolerance, user_info);
     converged_MLE = converged_MLE + 1;
     calculated.a = curve_parameters_MLE(1:n_curve_parameters:end).';
     calculated.x0 = curve_parameters_MLE(2:n_curve_parameters:end).';
@@ -78,7 +78,7 @@ for i = 1:n_points
     %% run GpuFit LSE
     reshaped_data = reshape(data,1,fit_size*fit_size*n_fits);
     [curve_parameters_LSE, converged_LSE, chisquare_LSE, n_iterations_LSE, time_LSE]...
-        = GpuFit(reshaped_data, sigma, fit_size*fit_size, max_iterations, start_values, parameters_to_fit, model_id, LSE, tolerance, user_info);
+        = GpuFit(reshaped_data, sigma, max_iterations, start_values, parameters_to_fit, model_id, LSE, tolerance, user_info);
     converged_LSE = converged_LSE + 1;
     calculated.a = curve_parameters_LSE(1:n_curve_parameters:end).';
     calculated.x0 = curve_parameters_LSE(2:n_curve_parameters:end).';

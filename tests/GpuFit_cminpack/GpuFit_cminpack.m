@@ -11,7 +11,7 @@ snr = 10.^log_snr;
 n_fits = 1000;
 fit_size = 15;
 
-sigma = [];
+sigma = ones(1,fit_size*fit_size);
 max_iterations = 20;
 model_id = 1; %GAUSS_2D
 estimator_id = 0; %LSE
@@ -94,7 +94,7 @@ for i = 1:n_graph_points
     
     %% run GpuFit
     [parameters_GpuFit, converged_GpuFit, chisquare_GpuFit, n_iterations_GpuFit, time_GpuFit]...
-        = GpuFit(data, sigma, fit_size*fit_size, max_iterations, initial_guess_parameters, parameters_to_fit, model_id, estimator_id, tolerance, user_info);
+        = GpuFit(data, sigma, max_iterations, initial_guess_parameters, parameters_to_fit, model_id, estimator_id, tolerance, user_info);
 
     converged_GpuFit = converged_GpuFit + 1;
     
