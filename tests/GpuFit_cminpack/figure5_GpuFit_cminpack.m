@@ -1,7 +1,7 @@
 function [] = figure5_GpuFit_cminpack()
 
 %% test parameters
-n_graph_points = 20;
+n_graph_points = 30;
 snr_min = 2;
 snr_max = 100000000;
 log_min = log10(snr_min);
@@ -95,7 +95,7 @@ noise_std_dev = mean_amplitude ./ snr;
 
 for i = 1:n_graph_points
     
-    fprintf('SNR = %8.3f', snr(i));
+    fprintf('SNR = %8.3f \n', snr(i));
     
     data = generate_2Dgaussians(data_parameters, n_fits, fit_size);
     data = data + noise_std_dev(i) * randn(fit_size,fit_size,n_fits);
@@ -103,8 +103,8 @@ for i = 1:n_graph_points
     
     %% run GpuFit
     [parameters_GpuFit, converged_GpuFit, chisquare_GpuFit, n_iterations_GpuFit, time_GpuFit]...
-        = GpuFit(n_fits, data, model_id, n_parameters, initial_guess_parameters, ...
-                 weights, tolerance, max_iterations, parameters_to_fit, estimator_id, user_info);
+        = GpuFit(n_fits, data, model_id, initial_guess_parameters, weights, tolerance, ...
+                 max_iterations, parameters_to_fit, estimator_id, user_info);
     
     gpufit_results.a  = parameters_GpuFit(1:n_parameters:end).';
     gpufit_results.x0 = parameters_GpuFit(2:n_parameters:end).';
@@ -178,7 +178,7 @@ filename = 'figure5_GpuFit_cminpack';
 %% save data
 save(filename);
 
-%% write file precision
+%% write file
 xlsfilename = [filename '.xls'];
 
 Raw(1:100, 1:100)=deal(NaN);
