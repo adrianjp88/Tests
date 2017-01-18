@@ -26,6 +26,8 @@ cminapck_path_64 = 'D:\Sources\MexFiles\64';
 GPULMFit_path_64 = ''; %non-existent
 %-------------------------------------------------
 
+GPUFIT_MATLAB_BINDING_PATH = 'C:\Mark\Software Development\C projects\Visual Studio 2013 projects\Git\GPUfit_repo\GPUfit\bindings\matlab';
+
 
 %% add paths
 if win32
@@ -44,5 +46,7 @@ if win64
     addpath (cminapck_path_64)
     addpath (GPULMFit_path_64) %non-existent
 end
+
+addpath (GPUFIT_MATLAB_BINDING_PATH);
 
 addpath ( genpath ( pwd ) )
