@@ -2,9 +2,9 @@ function [] = figure6_GpuFit_cpufit_speed()
 
 %% test parameters
 LogNFitsMin = 0;
-LogNFitsMax = 8;
+LogNFitsMax = 6;
 sampling_factor = 5;
-skip_cpufit = 1;
+skip_cpufit = 0;
 
 %% set up n_fits parameter
 ranges = logspace(LogNFitsMin,LogNFitsMax,LogNFitsMax-LogNFitsMin+1);
@@ -36,8 +36,8 @@ user_info = 0;
 tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
-gauss_pos_offset_max = 1.0;
-initial_guess_offset_frac = 0.5;
+gauss_pos_offset_max = 0.5;
+initial_guess_offset_frac = 0.1;
 snr = 10;
 
 %% test setup
@@ -208,6 +208,11 @@ for i = 1:length(n_fits)
     mean_iterations_GpuFit(i) = mean(valid_n_iterations);
 
     print_fit_info(precision_GpuFit(i), time_GpuFit, 'Gpufit', numel(valid_indices)/tmp_n_fits, mean_iterations_GpuFit(i));
+
+    if skip_cpufit == 0 
+        speed_increase_factor(i) = speed_GpuFit(i)/speed_cpufit(i);
+        fprintf('Speedup factor = %f7.2\n', speed_increase_factor(i));
+    end
     
 end
 
@@ -220,11 +225,12 @@ xlsfilename = [filename '.xls'];
 Raw(1:100, 1:100)=deal(NaN);
 xlswrite(xlsfilename,Raw,1)
 
-xlscolumns = {'number of fits' 'GpuFit' 'cpufit'};
+xlscolumns = {'number of fits' 'GpuFit' 'cpufit' 'speedup_factor'};
 xlswrite(xlsfilename,xlscolumns,1,'A1')
 xlsmat(:,1) = n_fits;
 xlsmat(:,2) = speed_GpuFit;
 xlsmat(:,3) = speed_cpufit;
+xlsmat(:,4) = speed_increase_factor;
 xlswrite(xlsfilename,xlsmat,1,'A2')
 
 %% plot
