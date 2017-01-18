@@ -18,7 +18,7 @@ n_fits = reshape(temp', [1 10/sampling_factor*(LogNFitsMax-LogNFitsMin)]);
 n_fits = [10^LogNFitsMin n_fits];
 
 %% parameters determining the data to be fit
-fit_size = 7;
+fit_size = 5;
 gauss_amplitude = 500;
 gauss_width = 1.0;
 gauss_baseline = 10;
@@ -36,7 +36,7 @@ user_info = 0;
 tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
-gauss_pos_offset_max = 2.0;
+gauss_pos_offset_max = 1.0;
 initial_guess_offset_frac = 0.5;
 snr = 10;
 
@@ -212,10 +212,7 @@ for i = 1:length(n_fits)
 end
 
 %% output filename
-filename = 'figure5_GpuFit_cminpack';
-
-%% save data
-save(filename);
+filename = 'figure6_GpuFit_CpuFit_speed';
 
 %% write file
 xlsfilename = [filename '.xls'];

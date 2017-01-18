@@ -175,9 +175,6 @@ end
 %% output filename
 filename = 'figure5_GpuFit_cminpack';
 
-%% save data
-save(filename);
-
 %% write file
 xlsfilename = [filename '.xls'];
 
