@@ -6,3 +6,4 @@ tests/GpuFit_CpuFit_profile/GpuFit_CpuFit_speed.xls
 tests/GpuFit_GPULMFit_cminpack_precision/GpuFit_GPULMFit_cminpack_precision.xls
 *.xls
 *.asv
+mex_function_calls/GpuFit.m
