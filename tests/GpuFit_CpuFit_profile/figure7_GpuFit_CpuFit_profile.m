@@ -2,7 +2,7 @@ function [] = figure7_GpuFit_CpuFit_profile()
 
 
 %% number of fits per test point
-n_fits = 500000;
+n_fits = 50000;
 
 %% parameters determining the data to be fit
 fit_size = 15;
@@ -89,7 +89,7 @@ noise_std_dev = mean_amplitude ./ snr;
 %% generate the data
 
 data = generate_2Dgaussians(data_parameters, n_fits, fit_size);
-data = data + noise_std_dev(i) * randn(fit_size,fit_size,n_fits);
+data = data + noise_std_dev * randn(fit_size,fit_size,n_fits);
 data = permute(data,[2,1,3]);
     
 
@@ -150,37 +150,37 @@ print_fit_info(precision_CpuFit, time_CpuFit, 'Cpufit', numel(valid_indices)/n_f
     data,...
     sigma,...
     max_iterations,...
-    initial_parameter_set,...
+    initial_guess_parameters,...
     parameters_to_fit,...
     model_id,...
     estimator_id,...
     tolerance);
 
-cpufit_results.a  = parameters_GpuFit(1:n_parameters:end).';
-cpufit_results.x0 = parameters_GpuFit(2:n_parameters:end).';
-cpufit_results.y0 = parameters_GpuFit(3:n_parameters:end).';
-cpufit_results.s  = parameters_GpuFit(4:n_parameters:end).';
-cpufit_results.b  = parameters_GpuFit(5:n_parameters:end).';
+gpufit_results.a  = parameters_GpuFit(1:n_parameters:end).';
+gpufit_results.x0 = parameters_GpuFit(2:n_parameters:end).';
+gpufit_results.y0 = parameters_GpuFit(3:n_parameters:end).';
+gpufit_results.s  = parameters_GpuFit(4:n_parameters:end).';
+gpufit_results.b  = parameters_GpuFit(5:n_parameters:end).';
 
 converged_GpuFit = converged_GpuFit + 1;
 
-valid_indices = get_valid_fit_results(converged_GpuFit, data_parameters, cpufit_results, chisquare_GpuFit);
+valid_indices = get_valid_fit_results(converged_GpuFit, data_parameters, gpufit_results, chisquare_GpuFit);
 
 valid_n_iterations = n_iterations_GpuFit(valid_indices);
 
-valid_cpufit_results.a  = cpufit_results.a(valid_indices);
-valid_cpufit_results.x0 = cpufit_results.x0(valid_indices);
-valid_cpufit_results.y0 = cpufit_results.y0(valid_indices);
-valid_cpufit_results.s  = cpufit_results.s(valid_indices);
-valid_cpufit_results.b  = cpufit_results.b(valid_indices);
+valid_gpufit_results.a  = gpufit_results.a(valid_indices);
+valid_gpufit_results.x0 = gpufit_results.x0(valid_indices);
+valid_gpufit_results.y0 = gpufit_results.y0(valid_indices);
+valid_gpufit_results.s  = gpufit_results.s(valid_indices);
+valid_gpufit_results.b  = gpufit_results.b(valid_indices);
 
-cpufit_abs_precision.a  = std(valid_cpufit_results.a  - data_parameters.a);
-cpufit_abs_precision.x0 = std(valid_cpufit_results.x0 - data_parameters.x0(valid_indices));
-cpufit_abs_precision.y0 = std(valid_cpufit_results.y0 - data_parameters.y0(valid_indices));
-cpufit_abs_precision.s  = std(valid_cpufit_results.s  - data_parameters.s);
-cpufit_abs_precision.b  = std(valid_cpufit_results.b  - data_parameters.b);
+gpufit_abs_precision.a  = std(valid_gpufit_results.a  - data_parameters.a);
+gpufit_abs_precision.x0 = std(valid_gpufit_results.x0 - data_parameters.x0(valid_indices));
+gpufit_abs_precision.y0 = std(valid_gpufit_results.y0 - data_parameters.y0(valid_indices));
+gpufit_abs_precision.s  = std(valid_gpufit_results.s  - data_parameters.s);
+gpufit_abs_precision.b  = std(valid_gpufit_results.b  - data_parameters.b);
 
-precision_GpuFit = cpufit_abs_precision;
+precision_GpuFit = gpufit_abs_precision;
 mean_iterations_GpuFit = mean(valid_n_iterations);
 print_fit_info(precision_GpuFit, time_GpuFit, 'Gpufit', numel(valid_indices)/n_fits, mean_iterations_GpuFit);
 

@@ -2,9 +2,9 @@ function [] = figure6_GpuFit_cpufit_speed()
 
 %% test parameters
 LogNFitsMin = 0;
-LogNFitsMax = 6;
+LogNFitsMax = 7;
 sampling_factor = 5;
-skip_cpufit = 0;
+skip_cpufit = 1;
 
 %% set up n_fits parameter
 ranges = logspace(LogNFitsMin,LogNFitsMax,LogNFitsMax-LogNFitsMin+1);
@@ -212,6 +212,8 @@ for i = 1:length(n_fits)
     if skip_cpufit == 0 
         speed_increase_factor(i) = speed_GpuFit(i)/speed_cpufit(i);
         fprintf('Speedup factor = %f7.2\n', speed_increase_factor(i));
+    else
+        speed_increase_factor(i) = 1.0;
     end
     
 end
