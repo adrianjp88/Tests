@@ -117,8 +117,6 @@ cpufit_results.y0 = parameters_CpuFit(3:n_parameters:end).';
 cpufit_results.s  = parameters_CpuFit(4:n_parameters:end).';
 cpufit_results.b  = parameters_CpuFit(5:n_parameters:end).';
 
-converged_CpuFit = converged_CpuFit + 1;
-
 valid_indices = get_valid_fit_results(converged_CpuFit, data_parameters, cpufit_results, chisquare_CpuFit);
 
 valid_n_iterations = n_iterations_CpuFit(valid_indices);
@@ -162,7 +160,6 @@ gpufit_results.y0 = parameters_GpuFit(3:n_parameters:end).';
 gpufit_results.s  = parameters_GpuFit(4:n_parameters:end).';
 gpufit_results.b  = parameters_GpuFit(5:n_parameters:end).';
 
-converged_GpuFit = converged_GpuFit + 1;
 
 valid_indices = get_valid_fit_results(converged_GpuFit, data_parameters, gpufit_results, chisquare_GpuFit);
 
@@ -219,8 +216,6 @@ xlswrite(xlsfilename,xlsrows,1,'A2')
 xlsmat(:,1) = times_GpuFit;
 xlsmat(:,2) = times_CpuFit;
 xlswrite(xlsfilename,xlsmat,1,'B2')
-
-write_test_info(xlsfilename, info);
 
 %% plot
 Plot_GpuFit_CpuFit_times(times_GpuFit, times_CpuFit, step_identifier);

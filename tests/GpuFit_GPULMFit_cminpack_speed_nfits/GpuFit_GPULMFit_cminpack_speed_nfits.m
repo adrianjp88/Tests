@@ -1,4 +1,40 @@
-function [] = GpuFit_GPULMFit_cminpack_speed_nfits()
+function [] = figure8A_GpuFit_GPULMFit_cminpack_speed_nfits()
+
+%% test parameters
+LogNFitsMin = 0;
+LogNFitsMax = 7;
+sampling_factor = 5;
+skip_cminpack = 1;
+
+%% set up n_fits parameter
+ranges = logspace(LogNFitsMin,LogNFitsMax,LogNFitsMax-LogNFitsMin+1);
+temp = zeros(LogNFitsMax-LogNFitsMin,10/sampling_factor);
+stepslog = LogNFitsMin:LogNFitsMax;
+for index = 1:length(stepslog)-1
+    steps = 10^(stepslog(index)) * sampling_factor;
+    temp(index,:) = steps:steps:ranges(index+1);
+end
+n_fits = reshape(temp', [1 10/sampling_factor*(LogNFitsMax-LogNFitsMin)]); 
+n_fits = [10^LogNFitsMin n_fits];
+
+%% parameters determining the data to be fit
+fit_size = 5;
+gauss_amplitude = 500;
+gauss_width = 1.0;
+gauss_baseline = 10;
+noise = 'gauss';
+
+%% parameters determining how the fit is carried out
+weights = [];
+sigma = ones(1,fit_size*fit_size);
+max_iterations = 20;
+model_id = 1; %GAUSS_2D
+estimator_id = 0; %LSE
+n_parameters = 5;
+parameters_to_fit = ones(1,n_parameters);
+user_info = 0;
+tolerance = 0.0001;
+
 
 fit_size = 16;
 sigma = ones(1,fit_size*fit_size);
