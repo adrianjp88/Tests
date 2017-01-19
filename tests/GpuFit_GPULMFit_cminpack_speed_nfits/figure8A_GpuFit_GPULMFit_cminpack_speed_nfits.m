@@ -2,9 +2,10 @@ function [] = figure8A_GpuFit_GPULMFit_cminpack_speed_nfits()
 
 %% test parameters
 LogNFitsMin = 0;
-LogNFitsMax = 7;
+LogNFitsMax = 4;
 sampling_factor = 5;
 skip_cminpack = 1;
+skip_gpulmfit = 1;
 
 %% set up n_fits parameter
 ranges = logspace(LogNFitsMin,LogNFitsMax,LogNFitsMax-LogNFitsMin+1);
@@ -36,8 +37,8 @@ user_info = 0;
 tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
-gauss_pos_offset_max = 0.5;
-initial_guess_offset_frac = 0.1;
+gauss_pos_offset_max = 1.0;
+initial_guess_offset_frac = 0.5;
 snr = 10;
 
 %% test setup
@@ -114,8 +115,6 @@ data = permute(data,[2,1,3]);
 %% test loop
 for i = 1:length(n_fits)
 
-    fprintf('%d fits\n', n_fits(i));
-
     tmp_n_fits = n_fits(i);
     
     fprintf('%d fits\n', tmp_n_fits);
@@ -160,61 +159,111 @@ for i = 1:length(n_fits)
 
     %% save test results
     speed_GpuFit(i) = tmp_n_fits/time_GpuFit;
-    precision_GpuFit(i) = gpufit_abs_precision;
+    precision_GpuFit(i) = gpufit_abs_precision.x0;
     mean_iterations_GpuFit(i) = mean(valid_n_iterations);
 
-    print_fit_info(precision_GpuFit(i), time_GpuFit, 'Gpufit', numel(valid_indices)/tmp_n_fits, mean_iterations_GpuFit(i));
+    print_fit_info(gpufit_abs_precision, time_GpuFit, 'Gpufit', numel(valid_indices)/tmp_n_fits, mean_iterations_GpuFit(i));
    
     %% run GPU-LMFit
     
-    [parameters_GPULMFit, info_GPULMFit, time_GPULMFit] = GPULMFit(...
-        data,...
-        estimator_id,...
-        parameters.s,...
-        fit_size);
-    calculated.a = parameters_GPULMFit(2:n_parameters:end).';
-    calculated.x0 = parameters_GPULMFit(3:n_parameters:end).';
-    calculated.y0 = parameters_GPULMFit(4:n_parameters:end).';
-    calculated.s = parameters_GPULMFit(5:n_parameters:end).';
-    calculated.b = parameters_GPULMFit(1:n_parameters:end).';
+    if skip_gpulmfit == 0
     
-    speed_GPULMFit(i) = n_fits(i)/time_GPULMFit;
-    valid_indices = get_valid_fit_indices(ones(1,n_fits(i)), ones(1,n_fits(i)));
-    precision_GPULMFit(i) = calculate_precision(calculated, parameters, valid_indices);
-    print_fit_info(precision_GPULMFit(i), time_GPULMFit, 'GPU-LMFit', 0, 0);
+        [parameters_GPULMFit, info_GPULMFit, time_GPULMFit] = GPULMFit(...
+            tmp_data,...
+            estimator_id,...
+            tmp_data_params.s,...
+            fit_size);
+    
+        gpulmfit_results.a  = parameters_GPULMFit(2:n_parameters:end).';
+        gpulmfit_results.x0 = parameters_GPULMFit(3:n_parameters:end).';
+        gpulmfit_results.y0 = parameters_GPULMFit(4:n_parameters:end).';
+        gpulmfit_results.s  = parameters_GPULMFit(5:n_parameters:end).';
+        gpulmfit_results.b  = parameters_GPULMFit(1:n_parameters:end).';
+
+        converged_GPULMFit = ones(1,tmp_n_fits);
+        chisquare_GPULMFit = ones(1,tmp_n_fits);
+        n_iterations_GPULMFit = ones(1,tmp_n_fits);
+
+        valid_indices = get_valid_fit_results(converged_GPULMFit, tmp_data_params, gpulmfit_results, chisquare_GPULMFit);
+
+        valid_n_iterations = n_iterations_GPULMFit(valid_indices);
+
+        valid_gpulmfit_results.a = gpulmfit_results.a(valid_indices);
+        valid_gpulmfit_results.x0 = gpulmfit_results.x0(valid_indices);
+        valid_gpulmfit_results.y0 = gpulmfit_results.y0(valid_indices);
+        valid_gpulmfit_results.s = gpulmfit_results.s(valid_indices);
+        valid_gpulmfit_results.b = gpulmfit_results.b(valid_indices);
+    
+        gpulmfit_abs_precision.a  = std(valid_gpulmfit_results.a  - tmp_data_params.a);
+        gpulmfit_abs_precision.x0 = std(valid_gpulmfit_results.x0 - tmp_data_params.x0(valid_indices));
+        gpulmfit_abs_precision.y0 = std(valid_gpulmfit_results.y0 - tmp_data_params.y0(valid_indices));
+        gpulmfit_abs_precision.s  = std(valid_gpulmfit_results.s  - tmp_data_params.s);
+        gpulmfit_abs_precision.b  = std(valid_gpulmfit_results.b  - tmp_data_params.b);
+
+        speed_GPULMFit(i) = n_fits(i)/time_GPULMFit;
+        precision_GPULMFit(i) = gpulmfit_abs_precision.x0;
+
+        print_fit_info(gpulmfit_abs_precision, time_GPULMFit, 'GPU-LMFit', 0, 0);
+    
+    else
+       
+        speed_GPULMFit(i) = 1.0;
+        precision_GPULMFit(i) = 1.0;
+        
+    end
     
     
     %% run cminpack
-    [parameters_cminpack, info_cminpack, n_iterations_cminpack, time_cminpack]...
-        = cminpack(data, initial_parameter_set, model_id, tolerance);
-    converged_cminpack = (info_cminpack > 0) & (info_cminpack <= 3);
-    calculated.a = parameters_cminpack(1:n_parameters:end).';
-    calculated.x0= parameters_cminpack(2:n_parameters:end).';
-    calculated.y0 = parameters_cminpack(3:n_parameters:end).';
-    calculated.s = parameters_cminpack(4:n_parameters:end).';
-    calculated.b = parameters_cminpack(5:n_parameters:end).';
     
-    speed_cminpack(i) = n_fits(i)/time_cminpack;
-    valid_indices = get_valid_fit_indices(converged_cminpack, ones(1,n_fits(i)));
-    valid_n_iterations = n_iterations_cminpack(valid_indices);
-    mean_iterations_cminpack(i) = mean(valid_n_iterations);
-    precision_cminpack(i) = calculate_precision(calculated, parameters, valid_indices);
-    print_fit_info(precision_cminpack(i), time_cminpack, 'cminpack', numel(valid_indices)/n_fits(i), mean_iterations_cminpack(i));
+    if skip_cminpack == 0 
+    
+        [parameters_cminpack, info_cminpack, n_iterations_cminpack, time_cminpack]...
+            = cminpack(tmp_data, tmp_initial_params, model_id, tolerance);
+        
+        converged_cminpack = (info_cminpack > 0) & (info_cminpack <= 3);
+        chisquare_cminpack = ones(1,tmp_n_fits);
+        
+        cminpack_results.a  = parameters_cminpack(1:n_parameters:end).';
+        cminpack_results.x0 = parameters_cminpack(2:n_parameters:end).';
+        cminpack_results.y0 = parameters_cminpack(3:n_parameters:end).';
+        cminpack_results.s  = parameters_cminpack(4:n_parameters:end).';
+        cminpack_results.b  = parameters_cminpack(5:n_parameters:end).';
+
+        valid_indices = get_valid_fit_results(converged_cminpack, tmp_data_params, cminpack_results, chisquare_cminpack);
+
+        valid_n_iterations = n_iterations_cminpack(valid_indices);
+
+        valid_cminpack_results.a = cminpack_results.a(valid_indices);
+        valid_cminpack_results.x0 = cminpack_results.x0(valid_indices);
+        valid_cminpack_results.y0 = cminpack_results.y0(valid_indices);
+        valid_cminpack_results.s = cminpack_results.s(valid_indices);
+        valid_cminpack_results.b = cminpack_results.b(valid_indices);
+
+        cminpack_abs_precision.a  = std(valid_cminpack_results.a  - tmp_data_params.a);
+        cminpack_abs_precision.x0 = std(valid_cminpack_results.x0 - tmp_data_params.x0(valid_indices));
+        cminpack_abs_precision.y0 = std(valid_cminpack_results.y0 - tmp_data_params.y0(valid_indices));
+        cminpack_abs_precision.s  = std(valid_cminpack_results.s  - tmp_data_params.s);
+        cminpack_abs_precision.b  = std(valid_cminpack_results.b  - tmp_data_params.b);
+
+        %% save test results
+        speed_cminpack(i) = tmp_n_fits/time_cminpack;
+        precision_cminpack(i) = cminpack_abs_precision.x0;
+        mean_iterations_cminpack(i) = mean(valid_n_iterations);
+        print_fit_info(cminpack_abs_precision, time_cminpack, 'C Minpack', numel(valid_indices)/tmp_n_fits, mean_iterations_cminpack(i));
+
+    else
+        
+        %% save test results
+        speed_cminpack(i) = 1.0;
+        precision_cminpack(i) = 1.0;
+        mean_iterations_cminpack(i) = 1.0;
+        
+    end
+
 end
-%% save test info
-info.parameters = parameters;
-info.initial_parameters = initial_parameter_set;
-info.noise = noise;
-info.snr = snr;
-info.fit_size = fit_size;
-info.n_fits = n_fits;
-info.model_id = model_id;
 
 %% output filename
-filename = 'GpuFit_GPULMFit_cminpack_speed_nfits';
-    
-%% save data
-save(filename);
+filename = 'figure8A_GpuFit_GPULMFit_cminpack_speed_nfits';
 
 %% write file
 xlsfilename = [filename '.xls'];
@@ -222,7 +271,7 @@ xlsfilename = [filename '.xls'];
 Raw(1:100, 1:100)=deal(NaN);
 xlswrite(xlsfilename,Raw,1)
 
-xlscolumns = {'fit count' 'GpuFit' 'GPU-LMFit' 'Minpack'};
+xlscolumns = {'fit count' 'GpuFit' 'GPU-LMFit' 'C Minpack'};
 xlswrite(xlsfilename,xlscolumns,1,'A1')
 
 xlsmat(:,1) = n_fits;
@@ -230,8 +279,6 @@ xlsmat(:,2) = speed_GpuFit;
 xlsmat(:,3) = speed_GPULMFit;
 xlsmat(:,4) = speed_cminpack;
 xlswrite(xlsfilename,xlsmat,1,'A2')
-
-write_test_info(xlsfilename, info);
 
 %% plot
 Plot_GpuFit_GPULMFit_cminpack_speed(...
