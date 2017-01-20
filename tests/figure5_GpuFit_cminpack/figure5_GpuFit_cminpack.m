@@ -47,32 +47,17 @@ for i = 1:n_graph_points
         = GpuFit(n_fits, data, model_id, initial_guess_parameters, weights, tolerance, ...
                  max_iterations, parameters_to_fit, estimator_id, user_info);
     
-    gpufit_results.a  = parameters_GpuFit(1:n_parameters:end).';
-    gpufit_results.x0 = parameters_GpuFit(2:n_parameters:end).';
-    gpufit_results.y0 = parameters_GpuFit(3:n_parameters:end).';
-    gpufit_results.s  = parameters_GpuFit(4:n_parameters:end).';
-    gpufit_results.b  = parameters_GpuFit(5:n_parameters:end).';
-    
     converged_GpuFit = converged_GpuFit + 1;
-    
-    valid_indices = get_valid_fit_results(converged_GpuFit, data_parameters, gpufit_results, chisquare_GpuFit);
+             
+    chk_gpulmfit = 0;
 
-    valid_n_iterations = n_iterations_GpuFit(valid_indices);
+    [valid_gpufit_results, gpufit_abs_precision, mean_n_iterations, valid_indices] = ...
+        process_gaussian_fit_results(tmp_data_params, parameters_GpuFit, converged_GpuFit, ...
+                                     chisquare_GpuFit, n_iterations_GpuFit, chk_gpulmfit);
     
-    valid_gpufit_results.a = gpufit_results.a(valid_indices);
-    valid_gpufit_results.x0 = gpufit_results.x0(valid_indices);
-    valid_gpufit_results.y0 = gpufit_results.y0(valid_indices);
-    valid_gpufit_results.s = gpufit_results.s(valid_indices);
-    valid_gpufit_results.b = gpufit_results.b(valid_indices);
-    
-    gpufit_abs_precision.a  = std(valid_gpufit_results.a  - data_parameters.a);
-    gpufit_abs_precision.x0 = std(valid_gpufit_results.x0 - data_parameters.x0(valid_indices));
-    gpufit_abs_precision.y0 = std(valid_gpufit_results.y0 - data_parameters.y0(valid_indices));
-    gpufit_abs_precision.s  = std(valid_gpufit_results.s  - data_parameters.s);
-    gpufit_abs_precision.b  = std(valid_gpufit_results.b  - data_parameters.b);
     
     %% save test results
-    results_gpufit_mean_iterations(i) = mean(valid_n_iterations);
+    results_gpufit_mean_iterations(i) = mean_n_iterations;
     results_gpufit_precision(i) = gpufit_abs_precision;
     
     print_fit_info(results_gpufit_precision(i), time_GpuFit, 'Gpufit', numel(valid_indices)/n_fits, results_gpufit_mean_iterations(i));
@@ -81,32 +66,15 @@ for i = 1:n_graph_points
     [parameters_cminpack, info_cminpack, n_iterations_cminpack, time_cminpack]...
         = cminpack(data, initial_guess_parameters, model_id, tolerance);
     
-    cminpack_results.a = parameters_cminpack(1:n_parameters:end).';
-    cminpack_results.x0= parameters_cminpack(2:n_parameters:end).';
-    cminpack_results.y0 = parameters_cminpack(3:n_parameters:end).';
-    cminpack_results.s = parameters_cminpack(4:n_parameters:end).';
-    cminpack_results.b = parameters_cminpack(5:n_parameters:end).';
-    
     converged_cminpack = (info_cminpack > 0) & (info_cminpack <= 3);
-    
-    valid_indices = get_valid_fit_results(converged_cminpack, data_parameters, cminpack_results, ones(1,n_fits));
-    
-    valid_n_iterations = n_iterations_cminpack(valid_indices);
-    
-    valid_cminpack_results.a = cminpack_results.a(valid_indices);
-    valid_cminpack_results.x0 = cminpack_results.x0(valid_indices);
-    valid_cminpack_results.y0 = cminpack_results.y0(valid_indices);
-    valid_cminpack_results.s = cminpack_results.s(valid_indices);
-    valid_cminpack_results.b = cminpack_results.b(valid_indices);
+    chisquare_cminpack = ones(1,tmp_n_fits);
 
-    cminpack_abs_precision.a  = std(valid_cminpack_results.a  - data_parameters.a);
-    cminpack_abs_precision.x0 = std(valid_cminpack_results.x0 - data_parameters.x0(valid_indices));
-    cminpack_abs_precision.y0 = std(valid_cminpack_results.y0 - data_parameters.y0(valid_indices));
-    cminpack_abs_precision.s  = std(valid_cminpack_results.s  - data_parameters.s);
-    cminpack_abs_precision.b  = std(valid_cminpack_results.b  - data_parameters.b);
+    [valid_cminpack_results, cminpack_abs_precision, mean_n_iterations, valid_indices] = ...
+        process_gaussian_fit_results(tmp_data_params, parameters_cminpack, converged_cminpack, ...
+                                     chisquare_cminpack, n_iterations_cminpack);
     
     %% save test results
-    results_cminpack_mean_iterations(i) = mean(valid_n_iterations);
+    results_cminpack_mean_iterations(i) = mean_n_iterations;
     results_cminpack_precision(i) = cminpack_abs_precision;
     
     print_fit_info(results_cminpack_precision(i), time_cminpack, 'cminpack', numel(valid_indices)/n_fits, results_cminpack_mean_iterations(i));

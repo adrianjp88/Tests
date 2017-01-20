@@ -10,7 +10,7 @@ function [valid_fit_results, abs_precision, mean_n_iterations, valid_indices] = 
                              
     n_parameters = 5;
 
-    if chk_gpulmfit == 0 then
+    if chk_gpulmfit == 0
     
         fit_results.a  = raw_fit_results(1:n_parameters:end).';
         fit_results.x0 = raw_fit_results(2:n_parameters:end).';
