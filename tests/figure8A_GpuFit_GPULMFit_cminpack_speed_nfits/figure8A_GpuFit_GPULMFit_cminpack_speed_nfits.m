@@ -1,11 +1,11 @@
 function [] = figure8A_GpuFit_GPULMFit_cminpack_speed_nfits()
 
 %% test parameters
-LogNFitsMin = 0;
+LogNFitsMin = 1;
 LogNFitsMax = 5;
 sampling_factor = 5;
-skip_cminpack = 1;
-skip_gpulmfit = 1;
+skip_cminpack = 0;
+skip_gpulmfit = 0;
 
 %% set up n_fits parameter
 ranges = logspace(LogNFitsMin,LogNFitsMax,LogNFitsMax-LogNFitsMin+1);
@@ -81,7 +81,6 @@ for i = 1:length(n_fits)
     %% save test results
     speed_GpuFit(i) = tmp_n_fits/time_GpuFit;
     precision_GpuFit(i) = gpufit_abs_precision.x0;
-    mean_iterations_GpuFit(i) = mean_n_iterations;
 
     print_fit_info(gpufit_abs_precision, time_GpuFit, 'Gpufit', numel(valid_indices)/tmp_n_fits, mean_n_iterations);
    
@@ -134,7 +133,7 @@ for i = 1:length(n_fits)
         %% save test results
         speed_cminpack(i) = tmp_n_fits/time_cminpack;
         precision_cminpack(i) = cminpack_abs_precision.x0;
-        mean_iterations_cminpack(i) = mean_n_iterations;
+
         print_fit_info(cminpack_abs_precision, time_cminpack, 'C Minpack', numel(valid_indices)/tmp_n_fits, mean_n_iterations);
 
     else
@@ -142,7 +141,6 @@ for i = 1:length(n_fits)
         %% save test results
         speed_cminpack(i) = 1.0;
         precision_cminpack(i) = 1.0;
-        mean_iterations_cminpack(i) = 1.0;
         
     end
 

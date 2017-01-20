@@ -52,7 +52,7 @@ for i = 1:n_graph_points
     chk_gpulmfit = 0;
 
     [valid_gpufit_results, gpufit_abs_precision, mean_n_iterations, valid_indices] = ...
-        process_gaussian_fit_results(tmp_data_params, parameters_GpuFit, converged_GpuFit, ...
+        process_gaussian_fit_results(data_parameters, parameters_GpuFit, converged_GpuFit, ...
                                      chisquare_GpuFit, n_iterations_GpuFit, chk_gpulmfit);
     
     
@@ -67,10 +67,10 @@ for i = 1:n_graph_points
         = cminpack(data, initial_guess_parameters, model_id, tolerance);
     
     converged_cminpack = (info_cminpack > 0) & (info_cminpack <= 3);
-    chisquare_cminpack = ones(1,tmp_n_fits);
+    chisquare_cminpack = ones(1,n_fits);
 
     [valid_cminpack_results, cminpack_abs_precision, mean_n_iterations, valid_indices] = ...
-        process_gaussian_fit_results(tmp_data_params, parameters_cminpack, converged_cminpack, ...
+        process_gaussian_fit_results(data_parameters, parameters_cminpack, converged_cminpack, ...
                                      chisquare_cminpack, n_iterations_cminpack);
     
     %% save test results

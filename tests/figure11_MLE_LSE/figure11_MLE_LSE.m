@@ -1,46 +1,8 @@
-function [] = MLE_LSE()
+function [] = figure11_MLE_LSE()
 
-n_fits = 1000;
-fit_size = 15;
-
-sigma = ones(1,fit_size*fit_size);
-
-model_id = 1; %GAUSS_2D
-LSE = 0;
-MLE = 1;
-n_curve_parameters = 5;
-max_iterations = 100;
-parameters_to_fit = ones(1,n_curve_parameters);
-user_info = 0;
-tolerance = 0.0001;
-noise = 'poisson';
-
-pos_offset_dist = 1.0;
-
-xpos_mean = (fit_size-1)/2;
-xpos_offset = pos_offset_dist*rand(n_fits, 1) - (pos_offset_dist/2.0);
-input_xpos = xpos_mean + xpos_offset;
-
-ypos_mean = (fit_size-1)/2;
-ypos_offset = pos_offset_dist*rand(n_fits, 1) - (pos_offset_dist/2.0);
-input_ypos = ypos_mean + ypos_offset;
-
-parameters.a = 500;
-parameters.x0 = input_xpos;
-parameters.y0 = input_ypos;
-parameters.s = 1;
-parameters.b = 20;
-
-start_values = ones(1,n_curve_parameters);
-
-start_values(2) = (fit_size-1)/2;
-start_values(3) = (fit_size-1)/2;
-start_values(4) = parameters.s * 1.1;
-start_values(5) = parameters.b * 1.0;
-start_values = repmat(start_values, 1, n_fits);
+%% test data
 
 n_points = 5;
-
 amp_min = 100;
 amp_max = 10000;
 log_min = log10(amp_min);
@@ -48,69 +10,91 @@ log_max = log10(amp_max);
 log_amp = linspace(log_min, log_max, n_points);
 amp = 10.^log_amp;
 
-for i = 1:n_points
-    parameters.a = amp(i);
-    start_values(1:n_curve_parameters:end) = parameters.a * 1.1;
-    data = generate_2Dgaussians(parameters, n_fits, fit_size);
-    data = poissrnd(data,fit_size,fit_size,n_fits);
-    data = permute(data,[2,1,3]);
+%% number of fits per test point
+n_fits = 1000;
+
+%% parameters determining the data to be fit
+fit_size = 5;
+gauss_width = 1.0;
+gauss_baseline = 10;
+noise = 'poisson';
+
+%% parameters determining how the fit is carried out
+weights = [];
+sigma = ones(1,fit_size*fit_size);
+max_iterations = 20;
+model_id = 1; %GAUSS_2D
+n_parameters = 5;
+parameters_to_fit = ones(1,n_parameters);
+user_info = 0;
+tolerance = 0.0001;
+
+%% parameters determining the randomness of the data
+gauss_pos_offset_max = 0.0;
+initial_guess_offset_frac = 0.25;
+snr = 1;
+
+
+for i = 1:numel(amp)
+
+    tmp_ampl = amp(i);
     
+    fprintf('SNR = %8.3f \n', snr);
+    
+    [data, data_parameters, initial_guess_parameters] = ...
+        generate_gauss_fit_test_data(n_fits, fit_size, tmp_ampl, gauss_width, ...
+                                     gauss_baseline, noise, gauss_pos_offset_max, ...
+                                     initial_guess_offset_frac, snr);
+    
+
     %% run GpuFit MLE
-    [curve_parameters_MLE, converged_MLE, chisquare_MLE, n_iterations_MLE, time_MLE]...
-        = GpuFit(data, sigma, max_iterations, start_values, parameters_to_fit, model_id, MLE, tolerance, user_info);
+    
+    tmp_estimator = 1; 
+             
+    [parameters_MLE, converged_MLE, chisquare_MLE, n_iterations_MLE, time_MLE]...
+        = GpuFit(n_fits, data, model_id, initial_guess_parameters, weights, tolerance, ...
+                 max_iterations, parameters_to_fit, tmp_estimator, user_info);
+    
     converged_MLE = converged_MLE + 1;
-    calculated.a = curve_parameters_MLE(1:n_curve_parameters:end).';
-    calculated.x0 = curve_parameters_MLE(2:n_curve_parameters:end).';
-    calculated.y0 = curve_parameters_MLE(3:n_curve_parameters:end).';
-    calculated.s = curve_parameters_MLE(4:n_curve_parameters:end).';
-    calculated.b = curve_parameters_MLE(5:n_curve_parameters:end).';
-    
-    valid_indices = get_valid_fit_indices(converged_MLE, chisquare_MLE);
+             
+    chk_gpulmfit = 0;
 
-    valid_n_iterations = n_iterations_MLE(valid_indices);
+    [valid_gpufit_results, gpufit_abs_precision, mean_n_iterations, valid_indices] = ...
+        process_gaussian_fit_results(data_parameters, parameters_MLE, converged_MLE, ...
+                                     chisquare_MLE, n_iterations_MLE, chk_gpulmfit);
+                       
+    speed_MLE(i) = n_fits/time_MLE;
+    precision_MLE(i) = gpufit_abs_precision;
+    mean_iterations_MLE(i) = mean_n_iterations;
 
-    mean_iterations_MLE(i) = mean(valid_n_iterations);
+    print_fit_info(gpufit_abs_precision, time_MLE, 'MLE', numel(valid_indices)/n_fits, mean_n_iterations);
 
-    precision_MLE(i) = calculate_precision(calculated, parameters, valid_indices);
-
-    print_fit_info(precision_MLE(i), time_MLE, 'MLE', numel(valid_indices)/n_fits, mean_iterations_MLE(i));
-    
     %% run GpuFit LSE
-    reshaped_data = reshape(data,1,fit_size*fit_size*n_fits);
-    [curve_parameters_LSE, converged_LSE, chisquare_LSE, n_iterations_LSE, time_LSE]...
-        = GpuFit(reshaped_data, sigma, max_iterations, start_values, parameters_to_fit, model_id, LSE, tolerance, user_info);
+
+    tmp_estimator = 0; 
+             
+    [parameters_LSE, converged_LSE, chisquare_LSE, n_iterations_LSE, time_LSE]...
+        = GpuFit(n_fits, data, model_id, initial_guess_parameters, weights, tolerance, ...
+                 max_iterations, parameters_to_fit, tmp_estimator, user_info);
+    
     converged_LSE = converged_LSE + 1;
-    calculated.a = curve_parameters_LSE(1:n_curve_parameters:end).';
-    calculated.x0 = curve_parameters_LSE(2:n_curve_parameters:end).';
-    calculated.y0 = curve_parameters_LSE(3:n_curve_parameters:end).';
-    calculated.s = curve_parameters_LSE(4:n_curve_parameters:end).';
-    calculated.b = curve_parameters_LSE(5:n_curve_parameters:end).';
-    
-    valid_indices = get_valid_fit_indices(converged_LSE, chisquare_LSE);
-    
-    valid_n_iterations = n_iterations_LSE(valid_indices);
+             
+    chk_gpulmfit = 0;
 
-    mean_iterations_LSE(i) = mean(valid_n_iterations);
+    [valid_gpufit_results, gpufit_abs_precision, mean_n_iterations, valid_indices] = ...
+        process_gaussian_fit_results(data_parameters, parameters_LSE, converged_LSE, ...
+                                     chisquare_LSE, n_iterations_LSE, chk_gpulmfit);
+                       
+    speed_LSE(i) = n_fits/time_LSE;
+    precision_LSE(i) = gpufit_abs_precision;
+    mean_iterations_LSE(i) = mean_n_iterations;
 
-    precision_LSE(i) = calculate_precision(calculated, parameters, valid_indices);
+    print_fit_info(gpufit_abs_precision, time_LSE, 'LSE', numel(valid_indices)/n_fits, mean_n_iterations);
 
-    print_fit_info(precision_LSE(i), time_LSE, 'LSE', numel(valid_indices)/n_fits, mean_iterations_LSE(i));
-    
 end
-%% save test info
-info.parameters = parameters;
-info.initial_parameters = start_values;
-info.noise = noise;
-info.fit_size = fit_size;
-info.n_fits = n_fits;
-info.model_id = model_id;
-
 
 %% output filename
-filename = 'MLE_LSE';
-
-%% save data
-save(filename);
+filename = 'figure11_MLE_LSE';
 
 %% write .xls file precision
 xlsfilename = [filename '.xls'];
@@ -144,8 +128,6 @@ xlsmat(:,11) = [precision_LSE.b];
 xlswrite(xlsfilename,xlsmat,1,'A3')
 clear xlsmat
 
-write_test_info(xlsfilename, info);
-
 %% write file precision x0
 xlsfilename = [filename '_x0.xls'];
 
@@ -159,8 +141,6 @@ xlsmat(:,3) = [precision_LSE.x0];
 xlswrite(xlsfilename,xlsmat,1,'A2')
 clear xlsmat
 
-write_test_info(xlsfilename, info);
-
 %% write file iterations
 xlsfilename = [filename '_iterations.xls'];
 xlscolumns = {'SNR' 'MLE' 'LSE'};
@@ -172,8 +152,6 @@ xlsmat(:,3) = mean_iterations_LSE;
 
 xlswrite(xlsfilename,xlsmat,1,'A2')
 clear xlsmat
-
-write_test_info(xlsfilename, info);
 
 %% plot
  Plot_MLE_LSE_precision(amp, precision_MLE, precision_LSE)

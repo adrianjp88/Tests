@@ -4,7 +4,7 @@ function [] = GpuFit_GPULMFit_cminpack_speed_fitsize()
 fit_size = 5:1:25;
 n_fits = 10000;
 skip_cminpack = 0;
-skip_gpulmfit = 1;
+skip_gpulmfit = 0;
 
 %% parameters determining the data to be fit
 gauss_amplitude = 500;
@@ -65,7 +65,7 @@ for i = 1:length(fit_size)
         [parameters_GPULMFit, info_GPULMFit, time_GPULMFit] = GPULMFit(...
             data,...
             estimator_id,...
-            current_parameters.s,...
+            data_parameters.s,...
             fit_size(i));
 
         converged_GPULMFit = ones(1,n_fits);

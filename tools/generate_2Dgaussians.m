@@ -33,7 +33,7 @@ function [data] = generate_2Dgaussians(parameters, count, size, noise_type, nois
 
     for i = 1:count
 
-        if noise_type == 'gauss' 
+        if strcmp(noise_type,'gauss') 
 
             tmp_noise = noise_std_dev * randn(size,size);
 
@@ -42,14 +42,14 @@ function [data] = generate_2Dgaussians(parameters, count, size, noise_type, nois
                 .*exp(-1/2*((yj-y0(i))/s(i)).^2)...
                 + b(i) + tmp_noise;
 
-        elseif noise_type == 'poisson'
+        elseif strcmp(noise_type,'poisson')
 
             data(:,:,i)...
                 = a(i)*exp(-1/2*((xi-x0(i))/s(i)).^2)...
                 .*exp(-1/2*((yj-y0(i))/s(i)).^2)...
                 + b(i);
 
-            data = poissrnd(data,size,size);
+            data(:,:,i) = poissrnd(data(:,:,i),size,size);
 
         else
 

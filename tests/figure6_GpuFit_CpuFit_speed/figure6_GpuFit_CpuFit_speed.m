@@ -4,7 +4,7 @@ function [] = figure6_GpuFit_cpufit_speed()
 LogNFitsMin = 0;
 LogNFitsMax = 6;
 sampling_factor = 5;
-skip_cpufit = 1;
+skip_cpufit = 0;
 
 %% set up n_fits parameter
 ranges = logspace(LogNFitsMin,LogNFitsMax,LogNFitsMax-LogNFitsMin+1);
