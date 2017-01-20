@@ -33,73 +33,14 @@ tolerance = 0.0001;
 gauss_pos_offset_max = 2.0;
 initial_guess_offset_frac = 0.5;
 
-
-%% test setup
-
-gauss_xpos_mean = (fit_size-1)/2;
-gauss_ypos_mean = (fit_size-1)/2;
-
-gauss_pos_x = gauss_xpos_mean + ( 2.0*gauss_pos_offset_max*(rand(n_fits, 1) - 0.5) );
-gauss_pos_y = gauss_ypos_mean + ( 2.0*gauss_pos_offset_max*(rand(n_fits, 1) - 0.5) );
-
-initial_guess_xpos_offset_max = initial_guess_offset_frac * gauss_width;
-initial_guess_ypos_offset_max = initial_guess_offset_frac * gauss_width;
-initial_guess_ampl_offset_max = initial_guess_offset_frac * gauss_amplitude;
-initial_guess_width_offset_max = initial_guess_offset_frac * gauss_width;
-initial_guess_baseline_offset_max = initial_guess_offset_frac * gauss_baseline;
-
-initial_guess_xpos_offset = initial_guess_xpos_offset_max ...
-                            * 2.0 * (rand(n_fits, 1) - 0.5);
-                  
-initial_guess_ypos_offset = initial_guess_ypos_offset_max ...
-                            * 2.0 * (rand(n_fits, 1) - 0.5);
-
-initial_guess_ampl_offset = initial_guess_ampl_offset_max ...
-                            * 2.0 * (rand(n_fits, 1) - 0.5);
-                        
-initial_guess_width_offset = initial_guess_width_offset_max ...
-                             * 2.0 * (rand(n_fits, 1) - 0.5);
-                        
-initial_guess_baseline_offset = initial_guess_baseline_offset_max ...
-                                * 2.0 * (rand(n_fits, 1) - 0.5);
-                        
-initial_guess_xpos = gauss_pos_x + initial_guess_xpos_offset;
-initial_guess_ypos = gauss_pos_y + initial_guess_ypos_offset;
-initial_guess_ampl = gauss_amplitude + initial_guess_ampl_offset; 
-initial_guess_width = gauss_width + initial_guess_width_offset; 
-initial_guess_baseline = gauss_baseline + initial_guess_baseline_offset;
-
-data_parameters.a = gauss_amplitude;
-data_parameters.x0 = gauss_pos_x;
-data_parameters.y0 = gauss_pos_y;
-data_parameters.s = gauss_width;
-data_parameters.b = gauss_baseline;
-
-initial_guess_parameters = ones(1,n_parameters*n_fits);
-
-for i = 1:n_fits
-    tmp_index = (i-1) * n_parameters;
-    initial_guess_parameters(1 + tmp_index) = initial_guess_ampl(i);
-    initial_guess_parameters(2 + tmp_index) = initial_guess_xpos(i);
-    initial_guess_parameters(3 + tmp_index) = initial_guess_ypos(i);
-    initial_guess_parameters(4 + tmp_index) = initial_guess_width(i);
-    initial_guess_parameters(5 + tmp_index) = initial_guess_baseline(i);
-end
-
-gauss_fwtm = 4.292 * gauss_width; % only valid for circular gaussian
-fit_area = 3.1415 * (gauss_fwtm/2.0) * (gauss_fwtm/2.0);
-
-mean_amplitude = 2*pi*gauss_amplitude*gauss_width*gauss_width/fit_area;
-
-noise_std_dev = mean_amplitude ./ snr;
-
 for i = 1:n_graph_points
     
     fprintf('SNR = %8.3f \n', snr(i));
     
-    data = generate_2Dgaussians(data_parameters, n_fits, fit_size);
-    data = data + noise_std_dev(i) * randn(fit_size,fit_size,n_fits);
-    data = permute(data,[2,1,3]);
+    [data, data_parameters, initial_guess_parameters] = ...
+        generate_gauss_fit_test_data(n_fits, fit_size, gauss_amplitude, gauss_width, ...
+                                     gauss_baseline, noise, gauss_pos_offset_max, ...
+                                     initial_guess_offset_frac, snr(i));
     
     %% run GpuFit
     [parameters_GpuFit, converged_GpuFit, chisquare_GpuFit, n_iterations_GpuFit, time_GpuFit]...
