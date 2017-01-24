@@ -164,7 +164,8 @@ xlswrite(xlsfilename,xlsmat,1,'A2')
 
 %% plot
 Plot_GpuFit_cpufit_speed(n_fits, speed_GpuFit, speed_cpufit);
-savefig(filename)
+
+%savefig(filename)
 
 end
 
