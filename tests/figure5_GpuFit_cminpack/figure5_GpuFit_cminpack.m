@@ -2,7 +2,7 @@ function [] = figure5_GpuFit_cminpack()
 
 %% test parameters
 n_graph_points = 30;
-snr_min = 2;
+snr_min = 3.0;
 snr_max = 100000000;
 log_min = log10(snr_min);
 log_max = log10(snr_max);
@@ -10,7 +10,7 @@ log_snr = linspace(log_min, log_max, n_graph_points);
 snr = 10.^log_snr;
 
 %% number of fits per test point
-n_fits = 1000;
+n_fits = 10000;
 
 %% parameters determining the data to be fit
 fit_size = 15;
@@ -24,13 +24,13 @@ weights = [];
 max_iterations = 20;
 model_id = 1; %GAUSS_2D
 estimator_id = 0; %LSE
-n_parameters = 5;
+n_parameters = 15;
 parameters_to_fit = ones(1,n_parameters);
 user_info = 0;
 tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
-gauss_pos_offset_max = 2.0;
+gauss_pos_offset_max = 1.0;
 initial_guess_offset_frac = 0.5;
 
 for i = 1:n_graph_points

@@ -2,7 +2,7 @@ function [] = figure7_GpuFit_CpuFit_profile()
 
 
 %% number of fits per test point
-n_fits = 500000;
+n_fits = 1000000;
 
 %% parameters determining the data to be fit
 fit_size = 15;
@@ -22,7 +22,7 @@ user_info = 0;
 tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
-gauss_pos_offset_max = 2.0;
+gauss_pos_offset_max = 1.0;
 initial_guess_offset_frac = 0.5;
 snr = 10; 
 noise = 'gauss';

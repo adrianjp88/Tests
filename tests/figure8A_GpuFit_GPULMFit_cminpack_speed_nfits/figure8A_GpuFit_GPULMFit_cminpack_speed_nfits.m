@@ -1,8 +1,8 @@
 function [] = figure8A_GpuFit_GPULMFit_cminpack_speed_nfits()
 
 %% test parameters
-LogNFitsMin = 1;
-LogNFitsMax = 5;
+LogNFitsMin = 0;
+LogNFitsMax = 6;
 sampling_factor = 5;
 skip_cminpack = 0;
 skip_gpulmfit = 0;
@@ -38,7 +38,7 @@ tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
 gauss_pos_offset_max = 0.5;
-initial_guess_offset_frac = 0.1;
+initial_guess_offset_frac = 0.5;
 snr = 10;
 
 %% test setup

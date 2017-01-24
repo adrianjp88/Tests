@@ -37,7 +37,7 @@ tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
 gauss_pos_offset_max = 0.5;
-initial_guess_offset_frac = 0.1;
+initial_guess_offset_frac = 0.40;
 snr = 10;
 
 %% test setup
@@ -49,7 +49,8 @@ n_fits_max = n_fits(end);
                                  gauss_baseline, noise, gauss_pos_offset_max, ...
                                  initial_guess_offset_frac, snr);
 
-%% test loop
+%% test loop cpufit
+
 for i = 1:length(n_fits)
 
     tmp_n_fits = n_fits(i);
@@ -94,8 +95,26 @@ for i = 1:length(n_fits)
         mean_iterations_cpufit(i) = 1.0;
         
     end
-        
-      
+end
+
+%% test loop gpufit
+
+for i = 1:length(n_fits)
+
+    tmp_n_fits = n_fits(i);
+    
+    fprintf('%d fits\n', tmp_n_fits);
+
+    tmp_data = data(:,:,1:tmp_n_fits);
+    tmp_initial_params = initial_guess_parameters(1:tmp_n_fits*n_parameters);
+    
+    tmp_data_params.a  = data_parameters.a;
+    tmp_data_params.x0 = data_parameters.x0(1:tmp_n_fits);
+    tmp_data_params.y0 = data_parameters.y0(1:tmp_n_fits);
+    tmp_data_params.s  = data_parameters.s;
+    tmp_data_params.b  = data_parameters.b;
+    
+
     %% run GpuFit
     [parameters_GpuFit, converged_GpuFit, chisquare_GpuFit, n_iterations_GpuFit, time_GpuFit]...
         = GpuFit(tmp_n_fits, tmp_data, model_id, tmp_initial_params, weights, tolerance, ...
@@ -124,6 +143,7 @@ for i = 1:length(n_fits)
     end
     
 end
+
 
 %% output filename
 filename = 'figure6_GpuFit_CpuFit_speed';
