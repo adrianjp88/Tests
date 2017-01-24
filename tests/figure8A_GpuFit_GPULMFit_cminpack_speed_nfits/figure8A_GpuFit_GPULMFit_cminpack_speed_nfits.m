@@ -38,7 +38,7 @@ tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
 gauss_pos_offset_max = 0.5;
-initial_guess_offset_frac = 0.5;
+initial_guess_offset_frac = 0.4;
 snr = 10;
 
 %% test setup
