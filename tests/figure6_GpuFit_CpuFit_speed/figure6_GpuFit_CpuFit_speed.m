@@ -4,6 +4,8 @@ function [] = figure6_GpuFit_cpufit_speed()
 LogNFitsMin = 0;
 LogNFitsMax = 6;
 sampling_factor = 5;
+n_timing_repetitions_cpufit = 5;
+n_timing_repetitions_gpufit = 10;
 skip_cpufit = 0;
 
 %% set up n_fits parameter
@@ -37,7 +39,7 @@ tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
 gauss_pos_offset_max = 0.5;
-initial_guess_offset_frac = 0.40;
+initial_guess_offset_frac = 0.30;
 snr = 10;
 
 %% test setup
@@ -53,25 +55,36 @@ n_fits_max = n_fits(end);
 
 for i = 1:length(n_fits)
 
-    tmp_n_fits = n_fits(i);
-    
-    fprintf('%d fits\n', tmp_n_fits);
-
-    tmp_data = data(:,:,1:tmp_n_fits);
-    tmp_initial_params = initial_guess_parameters(1:tmp_n_fits*n_parameters);
-    
-    tmp_data_params.a  = data_parameters.a;
-    tmp_data_params.x0 = data_parameters.x0(1:tmp_n_fits);
-    tmp_data_params.y0 = data_parameters.y0(1:tmp_n_fits);
-    tmp_data_params.s  = data_parameters.s;
-    tmp_data_params.b  = data_parameters.b;
-    
     if skip_cpufit == 0 
     
-        %% run cpufit
-        [parameters_cpufit, converged_cpufit, chisquare_cpufit, n_iterations_cpufit, time_cpufit]...
-            = CpuFit(tmp_data, sigma, max_iterations, tmp_initial_params, parameters_to_fit, model_id, estimator_id, tolerance, user_info);
+        tmp_n_fits = n_fits(i);
 
+        fprintf('%d fits\n', tmp_n_fits);
+
+        tmp_data = data(:,:,1:tmp_n_fits);
+        tmp_initial_params = initial_guess_parameters(1:tmp_n_fits*n_parameters);
+
+        tmp_data_params.a  = data_parameters.a;
+        tmp_data_params.x0 = data_parameters.x0(1:tmp_n_fits);
+        tmp_data_params.y0 = data_parameters.y0(1:tmp_n_fits);
+        tmp_data_params.s  = data_parameters.s;
+        tmp_data_params.b  = data_parameters.b;
+    
+        tmp_timings = zeros(1,n_timing_repetitions_cpufit);
+        
+        for j = 1:n_timing_repetitions_cpufit
+        
+            %% run cpufit
+            [parameters_cpufit, converged_cpufit, chisquare_cpufit, n_iterations_cpufit, time_cpufit]...
+                = CpuFit(tmp_data, sigma, max_iterations, tmp_initial_params, parameters_to_fit, model_id, estimator_id, tolerance, user_info);
+
+            tmp_timings(j) = time_cpufit;
+            
+        end
+        
+        time_cpufit = mean(tmp_timings);
+        time_std_cpufit = std(tmp_timings);
+        
         converged_cpufit = converged_cpufit + 1;
 
         chk_gpulmfit = 0;
@@ -82,6 +95,7 @@ for i = 1:length(n_fits)
         
         %% save test results
         speed_cpufit(i) = tmp_n_fits/time_cpufit;
+        speed_std_cpufit(i) = (time_std_cpufit/time_cpufit) * speed_cpufit(i);
         precision_cpufit(i) = cpufit_abs_precision;
         mean_iterations_cpufit(i) = mean_n_iterations;
         print_fit_info(precision_cpufit(i), time_cpufit, 'Cpufit', numel(valid_indices)/tmp_n_fits, mean_n_iterations);
@@ -91,6 +105,7 @@ for i = 1:length(n_fits)
         
         %% save test results
         speed_cpufit(i) = 1.0;
+        speed_std_cpufit(i) = 1.0;
         precision_cpufit(i) = 1.0;
         mean_iterations_cpufit(i) = 1.0;
         
@@ -115,10 +130,21 @@ for i = 1:length(n_fits)
     tmp_data_params.b  = data_parameters.b;
     
 
-    %% run GpuFit
-    [parameters_GpuFit, converged_GpuFit, chisquare_GpuFit, n_iterations_GpuFit, time_GpuFit]...
-        = GpuFit(tmp_n_fits, tmp_data, model_id, tmp_initial_params, weights, tolerance, ...
-                 max_iterations, parameters_to_fit, estimator_id, user_info);
+    tmp_timings = zeros(1,n_timing_repetitions_gpufit);
+        
+    for j = 1:n_timing_repetitions_gpufit
+    
+        %% run GpuFit
+        [parameters_GpuFit, converged_GpuFit, chisquare_GpuFit, n_iterations_GpuFit, time_GpuFit]...
+            = GpuFit(tmp_n_fits, tmp_data, model_id, tmp_initial_params, weights, tolerance, ...
+                     max_iterations, parameters_to_fit, estimator_id, user_info);
+
+        tmp_timings(j) = time_GpuFit;
+                 
+    end
+                 
+    time_GpuFit = mean(tmp_timings);
+    time_std_GpuFit = std(tmp_timings);
     
     converged_GpuFit = converged_GpuFit + 1;
 
@@ -130,6 +156,7 @@ for i = 1:length(n_fits)
     
     %% save test results
     speed_GpuFit(i) = tmp_n_fits/time_GpuFit;
+    speed_std_GpuFit(i) = (time_std_GpuFit/time_GpuFit) * speed_GpuFit(i);
     precision_GpuFit(i) = gpufit_abs_precision;
     mean_iterations_GpuFit(i) = mean_n_iterations;
 
@@ -154,12 +181,14 @@ xlsfilename = [filename '.xls'];
 Raw(1:100, 1:100)=deal(NaN);
 xlswrite(xlsfilename,Raw,1)
 
-xlscolumns = {'number of fits' 'GpuFit' 'cpufit' 'speedup_factor'};
+xlscolumns = {'number of fits' 'GpuFit' 'GpuFit_std' 'cpufit' 'cpufit_std' 'speedup_factor'};
 xlswrite(xlsfilename,xlscolumns,1,'A1')
 xlsmat(:,1) = n_fits;
 xlsmat(:,2) = speed_GpuFit;
-xlsmat(:,3) = speed_cpufit;
-xlsmat(:,4) = speed_increase_factor;
+xlsmat(:,3) = speed_std_GpuFit;
+xlsmat(:,4) = speed_cpufit;
+xlsmat(:,5) = speed_std_cpufit;
+xlsmat(:,6) = speed_increase_factor;
 xlswrite(xlsfilename,xlsmat,1,'A2')
 
 %% plot
