@@ -2,9 +2,9 @@ function [] = figure6_gpufit_cpufit_speed()
 
 %% test parameters
 LogNFitsMin = 0;
-LogNFitsMax = 4;
+LogNFitsMax = 6;
 sampling_factor = 5;
-n_timing_repetitions_cpufit = 5;
+n_timing_repetitions_cpufit = 3;
 n_timing_repetitions_gpufit = 10;
 skip_cpufit = 0;
 
@@ -186,10 +186,10 @@ xlswrite(xlsfilename,xlscolumns,1,'A1')
 xlsmat(:,1) = n_fits;
 xlsmat(:,2) = speed_gpufit;
 xlsmat(:,3) = speed_std_gpufit;
-xlsmat(:,4) = speed_gpufit/speed_std_gpufit;
+xlsmat(:,4) = speed_std_gpufit./speed_gpufit;
 xlsmat(:,5) = speed_cpufit;
 xlsmat(:,6) = speed_std_cpufit;
-xlsmat(:,7) = speed_cpufit/speed_std_cpufit;
+xlsmat(:,7) = speed_std_cpufit./speed_cpufit;
 xlsmat(:,8) = speed_increase_factor;
 xlswrite(xlsfilename,xlsmat,1,'A2')
 
