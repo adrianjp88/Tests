@@ -1,4 +1,4 @@
-function [] = figure6_GpuFit_cpufit_speed()
+function [] = figure6_gpufit_cpufit_speed()
 
 %% test parameters
 LogNFitsMin = 0;
@@ -134,36 +134,36 @@ for i = 1:length(n_fits)
         
     for j = 1:n_timing_repetitions_gpufit
     
-        %% run GpuFit
-        [parameters_GpuFit, converged_GpuFit, chisquare_GpuFit, n_iterations_GpuFit, time_GpuFit]...
+        %% run gpufit
+        [parameters_gpufit, converged_gpufit, chisquare_gpufit, n_iterations_gpufit, time_gpufit]...
             = GpuFit(tmp_n_fits, tmp_data, model_id, tmp_initial_params, weights, tolerance, ...
                      max_iterations, parameters_to_fit, estimator_id, user_info);
 
-        tmp_timings(j) = time_GpuFit;
+        tmp_timings(j) = time_gpufit;
                  
     end
                  
-    time_GpuFit = mean(tmp_timings);
-    time_std_GpuFit = std(tmp_timings);
+    time_gpufit = mean(tmp_timings);
+    time_std_gpufit = std(tmp_timings);
     
-    converged_GpuFit = converged_GpuFit + 1;
+    converged_gpufit = converged_gpufit + 1;
 
     chk_gpulmfit = 0;
 
     [valid_gpufit_results, gpufit_abs_precision, mean_n_iterations, valid_indices] = ...
-        process_gaussian_fit_results(tmp_data_params, parameters_GpuFit, converged_GpuFit, ...
-                                     chisquare_GpuFit, n_iterations_GpuFit, chk_gpulmfit);
+        process_gaussian_fit_results(tmp_data_params, parameters_gpufit, converged_gpufit, ...
+                                     chisquare_gpufit, n_iterations_gpufit, chk_gpulmfit);
     
     %% save test results
-    speed_GpuFit(i) = tmp_n_fits/time_GpuFit;
-    speed_std_GpuFit(i) = (time_std_GpuFit/time_GpuFit) * speed_GpuFit(i);
-    precision_GpuFit(i) = gpufit_abs_precision;
-    mean_iterations_GpuFit(i) = mean_n_iterations;
+    speed_gpufit(i) = tmp_n_fits/time_gpufit;
+    speed_std_gpufit(i) = (time_std_gpufit/time_gpufit) * speed_gpufit(i);
+    precision_gpufit(i) = gpufit_abs_precision;
+    mean_iterations_gpufit(i) = mean_n_iterations;
 
-    print_fit_info(precision_GpuFit(i), time_GpuFit, 'Gpufit', numel(valid_indices)/tmp_n_fits, mean_n_iterations);
+    print_fit_info(precision_gpufit(i), time_gpufit, 'Gpufit', numel(valid_indices)/tmp_n_fits, mean_n_iterations);
 
     if skip_cpufit == 0 
-        speed_increase_factor(i) = speed_GpuFit(i)/speed_cpufit(i);
+        speed_increase_factor(i) = speed_gpufit(i)/speed_cpufit(i);
         fprintf('Speedup factor = %f7.2\n', speed_increase_factor(i));
     else
         speed_increase_factor(i) = 1.0;
@@ -173,7 +173,7 @@ end
 
 
 %% output filename
-filename = 'figure6_GpuFit_CpuFit_speed';
+filename = 'figure6_gpufit_CpuFit_speed';
 
 %% write file
 xlsfilename = [filename '.xls'];
@@ -181,37 +181,39 @@ xlsfilename = [filename '.xls'];
 Raw(1:100, 1:100)=deal(NaN);
 xlswrite(xlsfilename,Raw,1)
 
-xlscolumns = {'number of fits' 'GpuFit' 'GpuFit_std' 'cpufit' 'cpufit_std' 'speedup_factor'};
+xlscolumns = {'n_fits' 'speed_gpufit' 'std_gpufit' 'pct_gpufit' 'speed_cpufit' 'std_cpufit' 'pct_cpufit' 'speedup_factor'};
 xlswrite(xlsfilename,xlscolumns,1,'A1')
 xlsmat(:,1) = n_fits;
-xlsmat(:,2) = speed_GpuFit;
-xlsmat(:,3) = speed_std_GpuFit;
-xlsmat(:,4) = speed_cpufit;
-xlsmat(:,5) = speed_std_cpufit;
-xlsmat(:,6) = speed_increase_factor;
+xlsmat(:,2) = speed_gpufit;
+xlsmat(:,3) = speed_std_gpufit;
+xlsmat(:,4) = speed_gpufit/speed_std_gpufit;
+xlsmat(:,5) = speed_cpufit;
+xlsmat(:,6) = speed_std_cpufit;
+xlsmat(:,7) = speed_cpufit/speed_std_cpufit;
+xlsmat(:,8) = speed_increase_factor;
 xlswrite(xlsfilename,xlsmat,1,'A2')
 
 %% plot
-Plot_GpuFit_cpufit_speed(n_fits, speed_GpuFit, speed_cpufit);
+plot_gpufit_cpufit_speed(n_fits, speed_gpufit, speed_cpufit);
 
 %savefig(filename)
 
 end
 
-function [] = Plot_GpuFit_cpufit_speed(n_fits, speed_GpuFit, speed_cpufit)
+function [] = plot_gpufit_cpufit_speed(n_fits, speed_gpufit, speed_cpufit)
 
-while length(speed_GpuFit) > length(speed_cpufit)
+while length(speed_gpufit) > length(speed_cpufit)
     speed_cpufit = [speed_cpufit speed_cpufit(end)];
 end
 
-figure('Name', 'GpuFit vs cpufit', 'NumberTitle', 'off');
+figure('Name', 'gpufit vs cpufit', 'NumberTitle', 'off');
 semilogx(...
-    n_fits, speed_GpuFit, 'red.-', ...
+    n_fits, speed_gpufit, 'red.-', ...
     n_fits, speed_cpufit, 'blue.-', ...
     'LineWidth', 8)
 xlabel('number of fits')
 ylabel('fits per second')
-legend('GpuFit', 'cpufit')
+legend('gpufit', 'cpufit')
 
 grid on;
 box off;
