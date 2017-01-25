@@ -2,11 +2,11 @@ function [] = figure6_gpufit_cpufit_speed()
 
 %% test parameters
 LogNFitsMin = 0;
-LogNFitsMax = 8;
+LogNFitsMax = 4;
 sampling_factor = 5;
 n_timing_repetitions_cpufit = 3;
 n_timing_repetitions_gpufit = 2;
-skip_cpufit = 1;
+skip_cpufit = 0;
 
 %% set up n_fits parameter
 ranges = logspace(LogNFitsMin,LogNFitsMax,LogNFitsMax-LogNFitsMin+1);
@@ -28,13 +28,12 @@ noise = 'gauss';
 
 %% parameters determining how the fit is carried out
 weights = [];
-sigma = ones(1,fit_size*fit_size);
 max_iterations = 20;
 model_id = 1; %GAUSS_2D
 estimator_id = 0; %LSE
 n_parameters = 5;
-parameters_to_fit = ones(1,n_parameters);
-user_info = 0;
+parameters_to_fit = ones(1,n_parameters,'int32');
+user_info = [];
 tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
@@ -76,8 +75,8 @@ for i = 1:length(n_fits)
         
             %% run cpufit
             [parameters_cpufit, converged_cpufit, chisquare_cpufit, n_iterations_cpufit, time_cpufit]...
-                = CpuFit(tmp_data, sigma, max_iterations, tmp_initial_params, parameters_to_fit, model_id, estimator_id, tolerance, user_info);
-
+                = CpuFit(tmp_data, weights, model_id, tmp_initial_params, tolerance, max_iterations, parameters_to_fit, estimator_id, user_info);
+            
             tmp_timings(j) = time_cpufit;
             
         end

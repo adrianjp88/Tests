@@ -38,7 +38,7 @@ function [data, true_parameters, initial_guess_parameters] = ...
     initial_guess_width = mean_width + initial_guess_width_offset; 
     initial_guess_baseline = mean_baseline + initial_guess_baseline_offset;
 
-    initial_guess_parameters = ones(1,n_parameters*n_fits);
+    initial_guess_parameters = ones(1,n_parameters*n_fits,'single');
 
     for i = 1:n_fits
         tmp_index = (i-1) * n_parameters;
