@@ -62,6 +62,8 @@ function [data] = generate_2Dgaussians(parameters, count, size, noise_type, nois
 
     end
 
+    data = reshape(data,size*size,count);
+    
     fprintf('done!\n');
 
 end

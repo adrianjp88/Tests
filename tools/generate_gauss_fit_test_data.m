@@ -38,16 +38,13 @@ function [data, true_parameters, initial_guess_parameters] = ...
     initial_guess_width = mean_width + initial_guess_width_offset; 
     initial_guess_baseline = mean_baseline + initial_guess_baseline_offset;
 
-    initial_guess_parameters = ones(1,n_parameters*n_fits,'single');
+    initial_guess_parameters = ones(n_parameters,n_fits,'single');
 
-    for i = 1:n_fits
-        tmp_index = (i-1) * n_parameters;
-        initial_guess_parameters(1 + tmp_index) = initial_guess_ampl(i);
-        initial_guess_parameters(2 + tmp_index) = initial_guess_xpos(i);
-        initial_guess_parameters(3 + tmp_index) = initial_guess_ypos(i);
-        initial_guess_parameters(4 + tmp_index) = initial_guess_width(i);
-        initial_guess_parameters(5 + tmp_index) = initial_guess_baseline(i);
-    end
+    initial_guess_parameters(1,:) = initial_guess_ampl;
+    initial_guess_parameters(2,:) = initial_guess_xpos;
+    initial_guess_parameters(3,:) = initial_guess_ypos;
+    initial_guess_parameters(4,:) = initial_guess_width;
+    initial_guess_parameters(5,:) = initial_guess_baseline;
 
     true_parameters.a  = mean_amplitude;
     true_parameters.x0 = gauss_pos_x;

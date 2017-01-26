@@ -2,10 +2,10 @@ function [] = figure6_gpufit_cpufit_speed()
 
 %% test parameters
 LogNFitsMin = 0;
-LogNFitsMax = 4;
+LogNFitsMax = 6;
 sampling_factor = 5;
 n_timing_repetitions_cpufit = 3;
-n_timing_repetitions_gpufit = 2;
+n_timing_repetitions_gpufit = 10;
 skip_cpufit = 0;
 
 %% set up n_fits parameter
@@ -32,7 +32,7 @@ max_iterations = 20;
 model_id = 1; %GAUSS_2D
 estimator_id = 0; %LSE
 n_parameters = 5;
-parameters_to_fit = ones(1,n_parameters,'int32');
+parameters_to_fit = ones(n_parameters,'int32');
 user_info = [];
 tolerance = 0.0001;
 
@@ -60,8 +60,8 @@ for i = 1:length(n_fits)
 
         fprintf('%d fits\n', tmp_n_fits);
 
-        tmp_data = data(:,:,1:tmp_n_fits);
-        tmp_initial_params = initial_guess_parameters(1:tmp_n_fits*n_parameters);
+        tmp_data = data(:,1:tmp_n_fits);
+        tmp_initial_params = initial_guess_parameters(:,1:tmp_n_fits);
 
         tmp_data_params.a  = data_parameters.a;
         tmp_data_params.x0 = data_parameters.x0(1:tmp_n_fits);
@@ -119,8 +119,8 @@ for i = 1:length(n_fits)
     
     fprintf('%d fits\n', tmp_n_fits);
 
-    tmp_data = data(:,:,1:tmp_n_fits);
-    tmp_initial_params = initial_guess_parameters(1:tmp_n_fits*n_parameters);
+    tmp_data = data(:,1:tmp_n_fits);
+    tmp_initial_params = initial_guess_parameters(:,1:tmp_n_fits);
     
     tmp_data_params.a  = data_parameters.a;
     tmp_data_params.x0 = data_parameters.x0(1:tmp_n_fits);
@@ -135,9 +135,9 @@ for i = 1:length(n_fits)
     
         %% run gpufit
         [parameters_gpufit, converged_gpufit, chisquare_gpufit, n_iterations_gpufit, time_gpufit]...
-            = GpuFit(tmp_n_fits, tmp_data, model_id, tmp_initial_params, weights, tolerance, ...
+            = GpuFit(tmp_data, weights, model_id, tmp_initial_params, tolerance, ...
                      max_iterations, parameters_to_fit, estimator_id, user_info);
-
+               
         tmp_timings(j) = time_gpufit;
                  
     end
