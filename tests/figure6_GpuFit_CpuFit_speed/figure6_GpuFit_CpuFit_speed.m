@@ -2,11 +2,11 @@ function [] = figure6_gpufit_cpufit_speed()
 
 %% test parameters
 LogNFitsMin = 0;
-LogNFitsMax = 6;
+LogNFitsMax = 8;
 sampling_factor = 5;
 n_timing_repetitions_cpufit = 3;
-n_timing_repetitions_gpufit = 10;
-skip_cpufit = 0;
+n_timing_repetitions_gpufit = 2;
+skip_cpufit = 1;
 
 %% set up n_fits parameter
 ranges = logspace(LogNFitsMin,LogNFitsMax,LogNFitsMax-LogNFitsMin+1);
@@ -75,7 +75,7 @@ for i = 1:length(n_fits)
         
             %% run cpufit
             [parameters_cpufit, converged_cpufit, chisquare_cpufit, n_iterations_cpufit, time_cpufit]...
-                = CpuFit(tmp_data, weights, model_id, tmp_initial_params, tolerance, max_iterations, parameters_to_fit, estimator_id, user_info);
+                = cpufit(tmp_data, weights, model_id, tmp_initial_params, tolerance, max_iterations, parameters_to_fit, estimator_id, user_info);
             
             tmp_timings(j) = time_cpufit;
             
@@ -135,7 +135,7 @@ for i = 1:length(n_fits)
     
         %% run gpufit
         [parameters_gpufit, converged_gpufit, chisquare_gpufit, n_iterations_gpufit, time_gpufit]...
-            = GpuFit(tmp_data, weights, model_id, tmp_initial_params, tolerance, ...
+            = gpufit(tmp_data, weights, model_id, tmp_initial_params, tolerance, ...
                      max_iterations, parameters_to_fit, estimator_id, user_info);
                
         tmp_timings(j) = time_gpufit;
@@ -172,7 +172,7 @@ end
 
 
 %% output filename
-filename = 'figure6_gpufit_CpuFit_speed';
+filename = 'figure6_gpufit_cpufit_speed';
 
 %% write file
 xlsfilename = [filename '.xls'];
