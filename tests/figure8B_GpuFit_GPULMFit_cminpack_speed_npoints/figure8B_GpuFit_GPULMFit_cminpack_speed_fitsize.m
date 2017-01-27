@@ -17,8 +17,8 @@ max_iterations = 20;
 model_id = 1; %GAUSS_2D
 estimator_id = 0; %LSE
 n_parameters = 5;
-parameters_to_fit = ones(1,n_parameters);
-user_info = 0;
+parameters_to_fit = ones(1,n_parameters)';
+user_info = [];
 tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
@@ -45,7 +45,7 @@ for i = 1:length(fit_size)
 
     %% run GpuFit
     [parameters_GpuFit, converged_GpuFit, chisquare_GpuFit, n_iterations_GpuFit, time_GpuFit]...
-        = GpuFit(n_fits, data, model_id, initial_guess_parameters, weights, tolerance, ...
+        = GpuFit(data, weights, model_id, initial_guess_parameters, tolerance, ...
                  max_iterations, parameters_to_fit, estimator_id, user_info);
              
     converged_GpuFit = converged_GpuFit + 1;

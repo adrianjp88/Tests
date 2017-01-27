@@ -21,12 +21,11 @@ noise = 'poisson';
 
 %% parameters determining how the fit is carried out
 weights = [];
-sigma = ones(1,fit_size*fit_size);
 max_iterations = 20;
 model_id = 1; %GAUSS_2D
 n_parameters = 5;
-parameters_to_fit = ones(1,n_parameters);
-user_info = 0;
+parameters_to_fit = ones(1,n_parameters,'int32')';
+user_info = [];
 tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
@@ -47,14 +46,15 @@ for i = 1:numel(amp)
                                      initial_guess_offset_frac, snr);
     
 
-    %% run GpuFit MLE
+    %% run gpufit MLE
     
     tmp_estimator = 1; 
              
     [parameters_MLE, converged_MLE, chisquare_MLE, n_iterations_MLE, time_MLE]...
-        = GpuFit(n_fits, data, model_id, initial_guess_parameters, weights, tolerance, ...
+        = gpufit(data, weights, model_id, initial_guess_parameters, tolerance, ...
                  max_iterations, parameters_to_fit, tmp_estimator, user_info);
-    
+               
+             
     converged_MLE = converged_MLE + 1;
              
     chk_gpulmfit = 0;
@@ -69,12 +69,12 @@ for i = 1:numel(amp)
 
     print_fit_info(gpufit_abs_precision, time_MLE, 'MLE', numel(valid_indices)/n_fits, mean_n_iterations);
 
-    %% run GpuFit LSE
+    %% run gpufit LSE
 
     tmp_estimator = 0; 
              
     [parameters_LSE, converged_LSE, chisquare_LSE, n_iterations_LSE, time_LSE]...
-        = GpuFit(n_fits, data, model_id, initial_guess_parameters, weights, tolerance, ...
+        = gpufit(data, weights, model_id, initial_guess_parameters, tolerance, ...
                  max_iterations, parameters_to_fit, tmp_estimator, user_info);
     
     converged_LSE = converged_LSE + 1;

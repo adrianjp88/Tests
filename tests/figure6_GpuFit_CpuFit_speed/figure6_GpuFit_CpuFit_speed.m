@@ -6,7 +6,7 @@ LogNFitsMax = 4;
 sampling_factor = 5;
 n_timing_repetitions_cpufit = 3;
 n_timing_repetitions_gpufit = 2;
-skip_cpufit = 1;
+skip_cpufit = 0;
 
 %% set up n_fits parameter
 ranges = logspace(LogNFitsMin,LogNFitsMax,LogNFitsMax-LogNFitsMin+1);
