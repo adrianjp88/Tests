@@ -12,13 +12,12 @@ noise = 'gauss';
 
 %% parameters determining how the fit is carried out
 weights = [];
-sigma = ones(1,fit_size*fit_size);
 max_iterations = 20;
 model_id = 1; %GAUSS_2D
 estimator_id = 0; %LSE
 n_parameters = 5;
-parameters_to_fit = ones(1,n_parameters);
-user_info = 0;
+parameters_to_fit = ones(n_parameters,1);
+user_info = [];
 tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
@@ -35,7 +34,7 @@ snr = 10;
                              
 %% run gpufit
 [parameters_gpufit, converged_gpufit, chisquare_gpufit, n_iterations_gpufit, time_gpufit]...
-    = GpuFit(n_fits, data, model_id, initial_guess_parameters, weights, tolerance, ...
+    = gpufit(data, weights, model_id, initial_guess_parameters, tolerance, ...
              max_iterations, parameters_to_fit, estimator_id, user_info);
 
 converged_gpufit = converged_gpufit + 1;

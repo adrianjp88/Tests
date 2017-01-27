@@ -2,7 +2,7 @@ function [] = figure8A_gpufit_GPULMFit_cminpack_speed_nfits()
 
 %% test parameters
 LogNFitsMin = 0;
-LogNFitsMax = 6;
+LogNFitsMax = 4;
 sampling_factor = 5;
 skip_cminpack = 0;
 skip_gpulmfit = 0;

@@ -25,7 +25,7 @@ max_iterations = 20;
 model_id = 1; %GAUSS_2D
 estimator_id = 0; %LSE
 n_parameters = 5;
-parameters_to_fit = ones(1,n_parameters,'int32')';
+parameters_to_fit = ones(n_parameters,1);
 user_info = [];
 tolerance = 0.0001;
 
