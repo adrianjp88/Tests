@@ -1,7 +1,7 @@
-function [] = figure5_GpuFit_cminpack()
+function [] = figure5_gpufit_cminpack()
 
 %% test parameters
-n_graph_points = 30;
+n_graph_points = 3;
 snr_min = 3.0;
 snr_max = 100000000;
 log_min = log10(snr_min);
@@ -24,9 +24,9 @@ weights = [];
 max_iterations = 20;
 model_id = 1; %GAUSS_2D
 estimator_id = 0; %LSE
-n_parameters = 15;
-parameters_to_fit = ones(1,n_parameters);
-user_info = 0;
+n_parameters = 5;
+parameters_to_fit = ones(1,n_parameters,'int32')';
+user_info = [];
 tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
@@ -42,25 +42,25 @@ for i = 1:n_graph_points
                                      gauss_baseline, noise, gauss_pos_offset_max, ...
                                      initial_guess_offset_frac, snr(i));
     
-    %% run GpuFit
-    [parameters_GpuFit, converged_GpuFit, chisquare_GpuFit, n_iterations_GpuFit, time_GpuFit]...
-        = GpuFit(n_fits, data, model_id, initial_guess_parameters, weights, tolerance, ...
-                 max_iterations, parameters_to_fit, estimator_id, user_info);
-    
-    converged_GpuFit = converged_GpuFit + 1;
+    %% run gpufit
+    [parameters_gpufit, converged_gpufit, chisquare_gpufit, n_iterations_gpufit, time_gpufit]...
+        = gpufit(data, weights, model_id, initial_guess_parameters, tolerance, ...
+                 max_iterations, parameters_to_fit, estimator_id, user_info);      
+             
+    converged_gpufit = converged_gpufit + 1;
              
     chk_gpulmfit = 0;
 
     [valid_gpufit_results, gpufit_abs_precision, mean_n_iterations, valid_indices] = ...
-        process_gaussian_fit_results(data_parameters, parameters_GpuFit, converged_GpuFit, ...
-                                     chisquare_GpuFit, n_iterations_GpuFit, chk_gpulmfit);
+        process_gaussian_fit_results(data_parameters, parameters_gpufit, converged_gpufit, ...
+                                     chisquare_gpufit, n_iterations_gpufit, chk_gpulmfit);
     
     
     %% save test results
     results_gpufit_mean_iterations(i) = mean_n_iterations;
     results_gpufit_precision(i) = gpufit_abs_precision;
     
-    print_fit_info(results_gpufit_precision(i), time_GpuFit, 'Gpufit', numel(valid_indices)/n_fits, results_gpufit_mean_iterations(i));
+    print_fit_info(results_gpufit_precision(i), time_gpufit, 'Gpufit', numel(valid_indices)/n_fits, results_gpufit_mean_iterations(i));
 
     %% run cminpack
     [parameters_cminpack, info_cminpack, n_iterations_cminpack, time_cminpack]...
@@ -82,7 +82,7 @@ for i = 1:n_graph_points
 end
 
 %% output filename
-filename = 'figure5_GpuFit_cminpack';
+filename = 'figure5_gpufit_cminpack';
 
 %% write file
 xlsfilename = [filename '.xls'];
@@ -90,7 +90,7 @@ xlsfilename = [filename '.xls'];
 Raw(1:100, 1:100)=deal(NaN);
 xlswrite(xlsfilename,Raw,1)
 
-xlscolumns = {'SNR' 'GpuFit_Precision' 'Minpack_Precision' 'GpuFit_Iterations' 'Minpack_Iterations'};
+xlscolumns = {'SNR' 'gpufit_Precision' 'Minpack_Precision' 'gpufit_Iterations' 'Minpack_Iterations'};
 xlswrite(xlsfilename,xlscolumns,1,'A1')
 
 xlsmat(:,1) = snr;
@@ -102,28 +102,28 @@ xlswrite(xlsfilename,xlsmat,1,'A2')
 clear xlsmat
 
 %% plot
-Plot_GpuFit_cmpipack_precision(snr, [results_gpufit_precision.x0], [results_cminpack_precision.x0])
+Plot_gpufit_cmpipack_precision(snr, [results_gpufit_precision.x0], [results_cminpack_precision.x0])
 savefig(filename)
-Plot_GpuFit_cmpipack_iterations(snr, results_cminpack_mean_iterations, results_gpufit_mean_iterations)
+Plot_gpufit_cmpipack_iterations(snr, results_cminpack_mean_iterations, results_gpufit_mean_iterations)
 savefig([filename '_iterations'])
 
 end
 
-function [] = Plot_GpuFit_cmpipack_iterations(...
+function [] = Plot_gpufit_cmpipack_iterations(...
     snr,...
     iterations_cminpack,...
-    iterations_GpuFit)
+    iterations_gpufit)
 
-figure('Name','GpuFit vs cminpack, snr presision','NumberTitle','off');
+figure('Name','gpufit vs cminpack, snr presision','NumberTitle','off');
 semilogx(...
-    snr, iterations_GpuFit, 'red+', ...
+    snr, iterations_gpufit, 'red+', ...
     snr, iterations_cminpack, 'blueo', ...
     'LineWidth', 4, ...
     'LineStyle', '-', ...
     'MarkerSize', 20)
 xlabel('SNR')
 ylabel('number of iterations')
-legend('GpuFit', 'Minpack')
+legend('gpufit', 'Minpack')
 xlim([-inf inf])
 grid on;
 box off;
@@ -132,12 +132,12 @@ current_figure.FontSize = 25;
 current_figure.LineWidth = 4;
 end
 
-function [] = Plot_GpuFit_cmpipack_precision(...
+function [] = Plot_gpufit_cmpipack_precision(...
     snr,...
     results_gpufit_precision,...
     precision_cminpack)
 
-figure('Name','GpuFit vs cminpack, snr presision','NumberTitle','off');
+figure('Name','gpufit vs cminpack, snr presision','NumberTitle','off');
 loglog(...
     snr, results_gpufit_precision, 'red+', ...
     snr, precision_cminpack, 'blues', ...
@@ -147,7 +147,7 @@ loglog(...
 xlabel('SNR')
 ylabel('relative standard deviation')
 legend(...
-    'GpuFit center x',...
+    'gpufit center x',...
     'Minpack center x')
 xlim([-inf inf])
 grid on;

@@ -2,7 +2,7 @@ function [] = figure6_gpufit_cpufit_speed()
 
 %% test parameters
 LogNFitsMin = 0;
-LogNFitsMax = 8;
+LogNFitsMax = 4;
 sampling_factor = 5;
 n_timing_repetitions_cpufit = 3;
 n_timing_repetitions_gpufit = 2;
@@ -32,7 +32,7 @@ max_iterations = 20;
 model_id = 1; %GAUSS_2D
 estimator_id = 0; %LSE
 n_parameters = 5;
-parameters_to_fit = ones(n_parameters,'int32');
+parameters_to_fit = ones(1,n_parameters,'int32')';
 user_info = [];
 tolerance = 0.0001;
 
