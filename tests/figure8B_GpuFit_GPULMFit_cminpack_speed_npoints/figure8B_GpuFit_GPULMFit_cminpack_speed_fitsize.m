@@ -1,8 +1,8 @@
-function [] = gpufit_GPULMFit_cminpack_speed_fitsize()
+function [] = figure8B_gpufit_gpulmfit_cminpack_speed_fitsize()
 
 %% test parameters
 fit_size = 5:1:25;
-n_fits = 10000;
+n_fits = 100000;
 skip_cminpack = 0;
 skip_gpulmfit = 0;
 
@@ -23,8 +23,8 @@ tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
 gauss_pos_offset_max = 0.5;
-initial_guess_offset_frac = 0.1;
-snr = 10;
+initial_guess_offset_frac = 0.3;
+snr = 60;
 
 
 %% test loop
@@ -62,27 +62,27 @@ for i = 1:length(fit_size)
    
     if skip_gpulmfit == 0
     
-        [parameters_GPULMFit, info_GPULMFit, time_GPULMFit] = GPULMFit(...
+        [parameters_gpulmfit, info_gpulmfit, time_gpulmfit] = GPULMFit(...
             data,...
             estimator_id,...
             data_parameters.s,...
             fit_size(i));
 
-        converged_GPULMFit = ones(1,n_fits);
-        chisquare_GPULMFit = ones(1,n_fits);
-        n_iterations_GPULMFit = ones(1,n_fits);
+        converged_gpulmfit = ones(1,n_fits);
+        chisquare_gpulmfit = ones(1,n_fits);
+        n_iterations_gpulmfit = ones(1,n_fits);
         chk_gpulmfit = 1;
         
         [valid_gpulmfit_results, gpulmfit_abs_precision, mean_n_iterations, valid_indices] = ...
-            process_gaussian_fit_results(data_parameters, parameters_GPULMFit, converged_GPULMFit, ...
-                                         chisquare_GPULMFit, n_iterations_GPULMFit, chk_gpulmfit);
+            process_gaussian_fit_results(data_parameters, parameters_gpulmfit, converged_gpulmfit, ...
+                                         chisquare_gpulmfit, n_iterations_gpulmfit, chk_gpulmfit);
 
-        speed_GPULMFit(i) = n_fits/time_GPULMFit;
-        print_fit_info(gpulmfit_abs_precision, time_GPULMFit, 'GPU-LMFit', numel(valid_indices)/n_fits, mean_n_iterations);
+        speed_gpulmfit(i) = n_fits/time_gpulmfit;
+        print_fit_info(gpulmfit_abs_precision, time_gpulmfit, 'GPU-LMFit', numel(valid_indices)/n_fits, mean_n_iterations);
 
     else
         
-        speed_GPULMFit(i) = 1.0;
+        speed_gpulmfit(i) = 1.0;
         
     end
     
@@ -113,7 +113,7 @@ for i = 1:length(fit_size)
 end
 
 %% output filenames
-filename = 'figure8B_gpufit_GPULMFit_cminpack_speed_fitsize';
+filename = 'figure8B_gpufit_gpulmfit_cminpack_speed_fitsize';
 
 %% write file
 xlsfilename = [filename '.xls'];
@@ -126,31 +126,31 @@ xlswrite(xlsfilename,xlscolumns,1,'A1')
 
 xlsmat(:,1) = fit_size;
 xlsmat(:,2) = speed_gpufit;
-xlsmat(:,3) = speed_GPULMFit;
+xlsmat(:,3) = speed_gpulmfit;
 xlsmat(:,4) = speed_cminpack;
 xlswrite(xlsfilename,xlsmat,1,'A2')
 
 %% plot
-Plot_gpufit_GPULMFit_Minpack_speed(...
+Plot_gpufit_gpulmfit_Minpack_speed(...
     fit_size,...
     speed_gpufit,...
-    speed_GPULMFit,...
+    speed_gpulmfit,...
     speed_cminpack)
 
 savefig(filename)
 
 end
 
-function [] = Plot_gpufit_GPULMFit_Minpack_speed(...
+function [] = Plot_gpufit_gpulmfit_Minpack_speed(...
     fit_size,...
     speed_gpufit,...
-    speed_GPULMFit,...
+    speed_gpulmfit,...
     speed_cminpack)
 
 figure('Name','gpufit vs GPU-LMFit vs Minpack, variable fit size','NumberTitle','off');
 plot(...
     fit_size, speed_gpufit, 'red.-', ...
-    fit_size, speed_GPULMFit, 'blue.-', ...
+    fit_size, speed_gpulmfit, 'blue.-', ...
     fit_size, speed_cminpack, 'green.-', ...
     'LineWidth', 8)
 xlabel('fit size')

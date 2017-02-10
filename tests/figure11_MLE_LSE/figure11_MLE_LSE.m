@@ -2,7 +2,7 @@ function [] = figure11_MLE_LSE()
 
 %% test data
 
-n_points = 5;
+n_points = 20;
 amp_min = 100;
 amp_max = 10000;
 log_min = log10(amp_min);
@@ -11,10 +11,10 @@ log_amp = linspace(log_min, log_max, n_points);
 amp = 10.^log_amp;
 
 %% number of fits per test point
-n_fits = 1000;
+n_fits = 10000;
 
 %% parameters determining the data to be fit
-fit_size = 5;
+fit_size = 15;
 gauss_width = 1.0;
 gauss_baseline = 10;
 noise = 'poisson';
@@ -29,16 +29,13 @@ user_info = [];
 tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
-gauss_pos_offset_max = 0.0;
-initial_guess_offset_frac = 0.25;
-snr = 1;
-
+gauss_pos_offset_max = 1.0;
+initial_guess_offset_frac = 0.3;
+snr = 1.0;
 
 for i = 1:numel(amp)
 
     tmp_ampl = amp(i);
-    
-    fprintf('SNR = %8.3f \n', snr);
     
     [data, data_parameters, initial_guess_parameters] = ...
         generate_gauss_fit_test_data(n_fits, fit_size, tmp_ampl, gauss_width, ...

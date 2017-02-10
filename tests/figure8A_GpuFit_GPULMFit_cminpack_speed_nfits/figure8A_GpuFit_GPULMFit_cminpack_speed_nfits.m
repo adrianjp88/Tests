@@ -2,10 +2,13 @@ function [] = figure8A_gpufit_GPULMFit_cminpack_speed_nfits()
 
 %% test parameters
 LogNFitsMin = 0;
-LogNFitsMax = 4;
+LogNFitsMax = 6;
 sampling_factor = 5;
 skip_cminpack = 0;
 skip_gpulmfit = 0;
+n_timing_repetitions_cminpack = 3;
+n_timing_repetitions_gpufit = 10;
+n_timing_repetitions_gpulmfit = 10;
 
 %% set up n_fits parameter
 ranges = logspace(LogNFitsMin,LogNFitsMax,LogNFitsMax-LogNFitsMin+1);
@@ -37,8 +40,8 @@ tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
 gauss_pos_offset_max = 0.5;
-initial_guess_offset_frac = 0.4;
-snr = 10;
+initial_guess_offset_frac = 0.3;
+snr = 60;
 
 %% test setup
 
@@ -66,10 +69,21 @@ for i = 1:length(n_fits)
     tmp_data_params.s  = data_parameters.s;
     tmp_data_params.b  = data_parameters.b;
 
-    %% run gpufit
-    [parameters_gpufit, converged_gpufit, chisquare_gpufit, n_iterations_gpufit, time_gpufit]...
-        = gpufit(tmp_data, weights, model_id, tmp_initial_params, tolerance, ...
-                 max_iterations, parameters_to_fit, estimator_id, user_info);
+    tmp_timings = zeros(1,n_timing_repetitions_gpufit);
+
+    for j = 1:n_timing_repetitions_gpufit
+        
+        %% run gpufit
+        [parameters_gpufit, converged_gpufit, chisquare_gpufit, n_iterations_gpufit, time_gpufit]...
+            = gpufit(tmp_data, weights, model_id, tmp_initial_params, tolerance, ...
+                     max_iterations, parameters_to_fit, estimator_id, user_info);
+    
+        tmp_timings(j) = time_gpufit;
+                 
+    end
+    
+    time_gpufit = mean(tmp_timings);
+    time_std_gpufit = std(tmp_timings);
     
     converged_gpufit = converged_gpufit + 1;
              
@@ -79,6 +93,7 @@ for i = 1:length(n_fits)
 
     %% save test results
     speed_gpufit(i) = tmp_n_fits/time_gpufit;
+    speed_std_gpufit(i) = (time_std_gpufit/time_gpufit) * speed_gpufit(i);    
     precision_gpufit(i) = gpufit_abs_precision.x0;
 
     print_fit_info(gpufit_abs_precision, time_gpufit, 'Gpufit', numel(valid_indices)/tmp_n_fits, mean_n_iterations);
@@ -87,12 +102,23 @@ for i = 1:length(n_fits)
     
     if skip_gpulmfit == 0
     
-        [parameters_GPULMFit, info_GPULMFit, time_GPULMFit] = GPULMFit(...
-            tmp_data,...
-            estimator_id,...
-            tmp_data_params.s,...
-            fit_size);
+        tmp_timings = zeros(1,n_timing_repetitions_gpulmfit);
 
+        for j = 1:n_timing_repetitions_gpulmfit
+        
+            [parameters_GPULMFit, info_GPULMFit, time_GPULMFit] = GPULMFit(...
+                tmp_data,...
+                estimator_id,...
+                tmp_data_params.s,...
+                fit_size);
+            
+            tmp_timings(j) = time_GPULMFit;
+                 
+        end
+    
+        time_GPULMFit = mean(tmp_timings);
+        time_std_GPULMFit = std(tmp_timings);
+        
         converged_GPULMFit = ones(1,tmp_n_fits);
         chisquare_GPULMFit = ones(1,tmp_n_fits);
         n_iterations_GPULMFit = ones(1,tmp_n_fits);
@@ -103,6 +129,7 @@ for i = 1:length(n_fits)
                                          chisquare_GPULMFit, n_iterations_GPULMFit, chk_gpulmfit);
         
         speed_GPULMFit(i) = n_fits(i)/time_GPULMFit;
+        speed_std_GPULMFit(i) = (time_std_GPULMFit/time_GPULMFit) * speed_GPULMFit(i);  
         precision_GPULMFit(i) = gpulmfit_abs_precision.x0;
 
         print_fit_info(gpulmfit_abs_precision, time_GPULMFit, 'GPU-LMFit', numel(valid_indices)/tmp_n_fits, mean_n_iterations);
@@ -110,6 +137,7 @@ for i = 1:length(n_fits)
     else
        
         speed_GPULMFit(i) = 1.0;
+        speed_std_GPULMFit(i) = 1.0;
         precision_GPULMFit(i) = 1.0;
         
     end
@@ -119,8 +147,19 @@ for i = 1:length(n_fits)
     
     if skip_cminpack == 0 
     
-        [parameters_cminpack, info_cminpack, n_iterations_cminpack, time_cminpack]...
-            = cminpack(tmp_data, tmp_initial_params, model_id, tolerance);
+        tmp_timings = zeros(1,n_timing_repetitions_cminpack);
+
+        for j = 1:n_timing_repetitions_gpulmfit
+        
+            [parameters_cminpack, info_cminpack, n_iterations_cminpack, time_cminpack]...
+                = cminpack(tmp_data, tmp_initial_params, model_id, tolerance);
+        
+            tmp_timings(j) = time_cminpack;
+            
+        end
+            
+        time_cminpack = mean(tmp_timings);
+        time_std_cminpack = std(tmp_timings);
         
         converged_cminpack = (info_cminpack > 0) & (info_cminpack <= 3);
         chisquare_cminpack = ones(1,tmp_n_fits);
@@ -131,6 +170,7 @@ for i = 1:length(n_fits)
 
         %% save test results
         speed_cminpack(i) = tmp_n_fits/time_cminpack;
+        speed_std_cminpack(i) = (time_std_cminpack/time_cminpack) * speed_cminpack(i); 
         precision_cminpack(i) = cminpack_abs_precision.x0;
 
         print_fit_info(cminpack_abs_precision, time_cminpack, 'C Minpack', numel(valid_indices)/tmp_n_fits, mean_n_iterations);
@@ -139,6 +179,7 @@ for i = 1:length(n_fits)
         
         %% save test results
         speed_cminpack(i) = 1.0;
+        speed_std_cminpack(i) = 1.0;
         precision_cminpack(i) = 1.0;
         
     end
@@ -159,8 +200,11 @@ xlswrite(xlsfilename,xlscolumns,1,'A1')
 
 xlsmat(:,1) = n_fits;
 xlsmat(:,2) = speed_gpufit;
-xlsmat(:,3) = speed_GPULMFit;
-xlsmat(:,4) = speed_cminpack;
+xlsmat(:,3) = speed_std_gpufit;
+xlsmat(:,4) = speed_GPULMFit;
+xlsmat(:,5) = speed_std_GPULMFit;
+xlsmat(:,6) = speed_cminpack;
+xlsmat(:,7) = speed_std_cminpack;
 xlswrite(xlsfilename,xlsmat,1,'A2')
 
 %% plot

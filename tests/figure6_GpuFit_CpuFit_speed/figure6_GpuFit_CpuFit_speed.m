@@ -2,11 +2,11 @@ function [] = figure6_gpufit_cpufit_speed()
 
 %% test parameters
 LogNFitsMin = 0;
-LogNFitsMax = 4;
+LogNFitsMax = 8;
 sampling_factor = 5;
 n_timing_repetitions_cpufit = 3;
-n_timing_repetitions_gpufit = 2;
-skip_cpufit = 0;
+n_timing_repetitions_gpufit = 4;
+skip_cpufit = 1;
 
 %% set up n_fits parameter
 ranges = logspace(LogNFitsMin,LogNFitsMax,LogNFitsMax-LogNFitsMin+1);
@@ -39,7 +39,7 @@ tolerance = 0.0001;
 %% parameters determining the randomness of the data
 gauss_pos_offset_max = 0.5;
 initial_guess_offset_frac = 0.30;
-snr = 10;
+snr = 60;
 
 %% test setup
 

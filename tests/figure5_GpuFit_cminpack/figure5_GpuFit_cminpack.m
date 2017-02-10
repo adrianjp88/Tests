@@ -1,8 +1,8 @@
 function [] = figure5_gpufit_cminpack()
 
 %% test parameters
-n_graph_points = 3;
-snr_min = 3.0;
+n_graph_points = 30;
+snr_min = 5.0;
 snr_max = 100000000;
 log_min = log10(snr_min);
 log_max = log10(snr_max);
@@ -10,7 +10,7 @@ log_snr = linspace(log_min, log_max, n_graph_points);
 snr = 10.^log_snr;
 
 %% number of fits per test point
-n_fits = 10000;
+n_fits = 20000;
 
 %% parameters determining the data to be fit
 fit_size = 15;

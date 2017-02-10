@@ -1,10 +1,10 @@
 function [] = figure10_gpufit_gpulmfit_cminpack_accuracy()
 
 %% number of fits per test point
-n_fits = 10000;
+n_fits = 100000;
 
 %% parameters determining the data to be fit
-fit_size = 5;
+fit_size = 15;
 gauss_amplitude = 500;
 gauss_width = 1.0;
 gauss_baseline = 10;
@@ -22,8 +22,8 @@ tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
 gauss_pos_offset_max = 0.0;
-initial_guess_offset_frac = 0.25;
-snr = 10;
+initial_guess_offset_frac = 0.3;
+snr = 60;
 
 [data, data_parameters, initial_guess_parameters] = ...
     generate_gauss_fit_test_data(n_fits, fit_size, gauss_amplitude, gauss_width, ...

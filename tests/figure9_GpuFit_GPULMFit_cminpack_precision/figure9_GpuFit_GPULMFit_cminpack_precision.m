@@ -10,7 +10,7 @@ log_snr = linspace(log_min, log_max, n_graph_points);
 snr = 10.^log_snr;
 
 %% number of fits per test point
-n_fits = 1000;
+n_fits = 10000;
 
 %% parameters determining the data to be fit
 fit_size = 15;
@@ -31,7 +31,7 @@ tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
 gauss_pos_offset_max = 1.0;
-initial_guess_offset_frac = 0.1;
+initial_guess_offset_frac = 0.3;
 
 
 
