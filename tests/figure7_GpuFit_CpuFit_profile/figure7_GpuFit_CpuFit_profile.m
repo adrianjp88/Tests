@@ -4,9 +4,9 @@ function [] = figure7_GpuFit_CpuFit_profile()
 n_fits = 5000000;
 
 %% parameters determining the data to be fit
-fit_size = 5;
+fit_size = 15;
 gauss_amplitude = 500;
-gauss_width = 0.7;
+gauss_width = 1.0;
 gauss_baseline = 10;
 
 %% parameters determining how the fit is carried out
@@ -20,9 +20,9 @@ user_info = [];
 tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
-gauss_pos_offset_max = 0.1;
-initial_guess_offset_frac = 0.1;
-snr = 10; 
+gauss_pos_offset_max = 1.0;
+initial_guess_offset_frac = 0.5;
+snr = 60; 
 noise = 'gauss';
 
 [data, data_parameters, initial_guess_parameters] = ...

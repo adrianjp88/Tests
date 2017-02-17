@@ -195,7 +195,7 @@ xlsfilename = [filename '.xls'];
 Raw(1:100, 1:100)=deal(NaN);
 xlswrite(xlsfilename,Raw,1)
 
-xlscolumns = {'fit count' 'gpufit' 'GPU-LMFit' 'C Minpack'};
+xlscolumns = {'fit count' 'gpufit' 'gpufit_err' 'GPU-LMFit' 'GPU-LMFit_err' 'C Minpack' 'C_Minpack_err'};
 xlswrite(xlsfilename,xlscolumns,1,'A1')
 
 xlsmat(:,1) = n_fits;
