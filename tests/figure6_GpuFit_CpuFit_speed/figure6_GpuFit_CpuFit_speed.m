@@ -17,7 +17,9 @@ for index = 1:length(stepslog)-1
     temp(index,:) = steps:steps:ranges(index+1);
 end
 n_fits = reshape(temp', [1 10/sampling_factor*(LogNFitsMax-LogNFitsMin)]); 
-n_fits = [10^LogNFitsMin n_fits 2.0*10^LogNFitsMax 5.0*10^LogNFitsMax];
+
+%n_fits = [10^LogNFitsMin n_fits 2.0*10^LogNFitsMax 5.0*10^LogNFitsMax];
+n_fits = [10^LogNFitsMin n_fits];
 
 %% parameters determining the data to be fit
 fit_size = 5;
