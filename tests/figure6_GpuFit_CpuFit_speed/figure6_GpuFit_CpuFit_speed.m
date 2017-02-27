@@ -5,7 +5,7 @@ LogNFitsMin = 0;
 LogNFitsMax = 8;
 sampling_factor = 5;
 n_timing_repetitions_cpufit = 3;
-n_timing_repetitions_gpufit = 4;
+n_timing_repetitions_gpufit = 2;
 skip_cpufit = 1;
 
 %% set up n_fits parameter
@@ -17,7 +17,7 @@ for index = 1:length(stepslog)-1
     temp(index,:) = steps:steps:ranges(index+1);
 end
 n_fits = reshape(temp', [1 10/sampling_factor*(LogNFitsMax-LogNFitsMin)]); 
-n_fits = [10^LogNFitsMin n_fits];
+n_fits = [10^LogNFitsMin n_fits 2.0*10^LogNFitsMax 5.0*10^LogNFitsMax];
 
 %% parameters determining the data to be fit
 fit_size = 5;
