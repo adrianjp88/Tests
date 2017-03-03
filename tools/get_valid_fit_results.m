@@ -1,7 +1,7 @@
 function [valid_fit_indices] = get_valid_fit_results(converged, data_parameters, fit_results, chisquare)
 
     discard_frac = 0.1;
-    n_std_dev_limit = 8.0;
+    n_std_dev_limit = 10.0;
 
     quant_chisq = quantile(chisquare, 1.0-discard_frac);
     filtered_chisq = chisquare(find(chisquare <= quant_chisq));
