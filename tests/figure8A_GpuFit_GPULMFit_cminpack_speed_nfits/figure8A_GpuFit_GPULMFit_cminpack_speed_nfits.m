@@ -106,10 +106,10 @@ for i = 1:length(n_fits)
 
         for j = 1:n_timing_repetitions_gpulmfit
         
-            [parameters_GPULMFit, info_GPULMFit, time_GPULMFit] = GPULMFit(...
+            [parameters_GPULMFit, info_GPULMFit, chisquare_GPULMFit, time_GPULMFit] = GPULMFit(...
                 tmp_data,...
                 estimator_id,...
-                tmp_data_params.s,...
+                tmp_initial_params,...
                 fit_size);
             
             tmp_timings(j) = time_GPULMFit;
@@ -119,10 +119,10 @@ for i = 1:length(n_fits)
         time_GPULMFit = mean(tmp_timings);
         time_std_GPULMFit = std(tmp_timings);
         
-        converged_GPULMFit = ones(1,tmp_n_fits);
-        chisquare_GPULMFit = ones(1,tmp_n_fits);
+        chisquare_GPULMFit = chisquare_GPULMFit .* chisquare_GPULMFit;
+        converged_GPULMFit = (info_GPULMFit > 0) & (info_GPULMFit <= 4);
         n_iterations_GPULMFit = ones(1,tmp_n_fits);
-        chk_gpulmfit = 1;
+        chk_gpulmfit = 0;
         
         [valid_gpulmfit_results, gpulmfit_abs_precision, mean_n_iterations, valid_indices] = ...
             process_gaussian_fit_results(tmp_data_params, parameters_GPULMFit, converged_GPULMFit, ...
