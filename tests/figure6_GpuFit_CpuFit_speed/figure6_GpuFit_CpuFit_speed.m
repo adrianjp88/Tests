@@ -2,11 +2,12 @@ function [] = figure6_gpufit_cpufit_speed()
 
 %% test parameters
 LogNFitsMin = 0;
-LogNFitsMax = 8;
+LogNFitsMax = 6;
 sampling_factor = 5;
 n_timing_repetitions_cpufit = 3;
-n_timing_repetitions_gpufit = 2;
-skip_cpufit = 1;
+n_timing_repetitions_gpufit = 10;
+skip_cpufit = 0;
+skip_plot = 1;
 
 %% set up n_fits parameter
 ranges = logspace(LogNFitsMin,LogNFitsMax,LogNFitsMax-LogNFitsMin+1);
@@ -18,8 +19,8 @@ for index = 1:length(stepslog)-1
 end
 n_fits = reshape(temp', [1 10/sampling_factor*(LogNFitsMax-LogNFitsMin)]); 
 
-%n_fits = [10^LogNFitsMin n_fits 2.0*10^LogNFitsMax 5.0*10^LogNFitsMax];
-n_fits = [10^LogNFitsMin n_fits];
+n_fits = [10^LogNFitsMin n_fits 2.0*10^LogNFitsMax 5.0*10^LogNFitsMax];
+%n_fits = [10^LogNFitsMin n_fits];
 
 %% parameters determining the data to be fit
 fit_size = 5;
@@ -195,8 +196,9 @@ xlsmat(:,8) = speed_increase_factor;
 xlswrite(xlsfilename,xlsmat,1,'A2')
 
 %% plot
-plot_gpufit_cpufit_speed(n_fits, speed_gpufit, speed_cpufit);
-
+if skip_plot == 0
+    plot_gpufit_cpufit_speed(n_fits, speed_gpufit, speed_cpufit);
+end
 %savefig(filename)
 
 end
