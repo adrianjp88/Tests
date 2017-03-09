@@ -4,7 +4,7 @@ function [] = figure6_gpufit_cpufit_speed()
 LogNFitsMin = 0;
 LogNFitsMax = 6;
 sampling_factor = 5;
-n_timing_repetitions_cpufit = 3;
+n_timing_repetitions_cpufit = 5;
 n_timing_repetitions_gpufit = 10;
 skip_cpufit = 0;
 skip_plot = 1;
@@ -19,8 +19,8 @@ for index = 1:length(stepslog)-1
 end
 n_fits = reshape(temp', [1 10/sampling_factor*(LogNFitsMax-LogNFitsMin)]); 
 
-n_fits = [10^LogNFitsMin n_fits 2.0*10^LogNFitsMax 5.0*10^LogNFitsMax];
-%n_fits = [10^LogNFitsMin n_fits];
+%n_fits = [10^LogNFitsMin n_fits 2.0*10^LogNFitsMax 5.0*10^LogNFitsMax];
+n_fits = [10^LogNFitsMin n_fits];
 
 %% parameters determining the data to be fit
 fit_size = 5;
