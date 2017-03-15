@@ -31,7 +31,7 @@ tolerance = 0.0001;
 
 %% parameters determining the randomness of the data
 gauss_pos_offset_max = 1.0;
-initial_guess_offset_frac = 0.5;
+initial_guess_offset_frac = 0.3;
 
 for i = 1:n_graph_points
     
