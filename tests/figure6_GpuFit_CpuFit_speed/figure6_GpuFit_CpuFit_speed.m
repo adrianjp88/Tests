@@ -5,7 +5,7 @@ LogNFitsMin = 0;
 LogNFitsMax = 6;
 sampling_factor = 5;
 n_timing_repetitions_cpufit = 5;
-n_timing_repetitions_gpufit = 10;
+n_timing_repetitions_gpufit = 3;
 skip_cpufit = 0;
 skip_plot = 1;
 
