@@ -215,7 +215,7 @@ end
 function[] = plotSingleHist(fitted_parameters, actual_parameters, max_value)
 
     histogram(fitted_parameters, 50);
-    ylim([0 850])
+    ylim([0 8500])
     yL = get(gca,'YLim');
     line([actual_parameters actual_parameters],yL,'Color','r', 'LineWidth', 1);
     m = mean(fitted_parameters);
