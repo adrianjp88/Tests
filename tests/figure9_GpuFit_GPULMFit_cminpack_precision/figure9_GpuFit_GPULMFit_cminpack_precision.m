@@ -3,7 +3,7 @@ function [] = figure9_gpufit_GPULMFit_cminpack_precision()
 %% test parameters
 n_graph_points = 20;
 snr_min = 2;
-snr_max = 100000000;
+snr_max = 1000;
 log_min = log10(snr_min);
 log_max = log10(snr_max);
 log_snr = linspace(log_min, log_max, n_graph_points);
