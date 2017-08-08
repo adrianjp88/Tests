@@ -1,7 +1,7 @@
 function [valid_fit_indices] = get_valid_fit_results(converged, data_parameters, fit_results, chisquare)
 
     discard_frac = 0.1;
-    n_std_dev_limit = 20.0;
+    n_std_dev_limit = 5.0;
 
     quant_chisq = quantile(chisquare, 1.0-discard_frac);
     filtered_chisq = chisquare(find(chisquare <= quant_chisq));
@@ -28,27 +28,33 @@ function [valid_fit_indices] = get_valid_fit_results(converged, data_parameters,
                                       
     mean_chisq = mean(filtered_chisq);
     std_chisq = std(filtered_chisq);
-    
-    dev_a  = abs(data_parameters.a - fit_results.a)';
-    dev_x0 = abs(data_parameters.x0 - fit_results.x0)';
-    dev_y0 = abs(data_parameters.y0 - fit_results.y0)';
-    dev_s  = abs(data_parameters.s - fit_results.s)';
-    dev_b  = abs(data_parameters.b - fit_results.b)';
-    
+        
     std_a  = std(filtered_a);
     std_x0 = std(filtered_x0);
     std_y0 = std(filtered_y0);
     std_s  = std(filtered_s);
     std_b  = std(filtered_b);
     
+    mean_a  = mean(filtered_a);
+    mean_x0 = mean(filtered_x0);
+    mean_y0 = mean(filtered_y0);
+    mean_s  = mean(filtered_s);
+    mean_b  = mean(filtered_b);
+    
+    dev_mean_a  = abs(mean_a - fit_results.a)';
+    dev_mean_x0 = abs(mean_x0 - fit_results.x0)';
+    dev_mean_y0 = abs(mean_y0 - fit_results.y0)';
+    dev_mean_s  = abs(mean_s - fit_results.s)';
+    dev_mean_b  = abs(mean_b - fit_results.b)';
+    
     chisq_upper_lim = mean_chisq + n_std_dev_limit*std_chisq;
     
     valid_fit_indices = find(converged==1 & ...
-                             dev_a  <= n_std_dev_limit*std_a & ...
-                             dev_x0 <= n_std_dev_limit*std_x0 & ...
-                             dev_y0 <= n_std_dev_limit*std_y0 & ...
-                             dev_s  <= n_std_dev_limit*std_s & ...
-                             dev_b  <= n_std_dev_limit*std_b & ...
+                             dev_mean_a  <= n_std_dev_limit*std_a & ...
+                             dev_mean_x0 <= n_std_dev_limit*std_x0 & ...
+                             dev_mean_y0 <= n_std_dev_limit*std_y0 & ...
+                             dev_mean_s  <= n_std_dev_limit*std_s & ...
+                             dev_mean_b  <= n_std_dev_limit*std_b & ...
                              chisquare <= chisq_upper_lim);
     
 end

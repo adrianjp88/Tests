@@ -1,27 +1,27 @@
-function [] = figure11_MLE_LSE()
+function [] = figure11_wmb_MLE_LSE()
 
 %% test data
 
 n_points = 20;
-amp_min = 100;
-amp_max = 10000;
+amp_min = 5;
+amp_max = 200;
 log_min = log10(amp_min);
 log_max = log10(amp_max);
 log_amp = linspace(log_min, log_max, n_points);
 amp = 10.^log_amp;
 
 %% number of fits per test point
-n_fits = 1000;
+n_fits = 10000;
 
 %% parameters determining the data to be fit
-fit_size = 25;
+fit_size = 15;
 gauss_width = 2.0;
-gauss_baseline = 10;
+gauss_baseline = 5;
 noise = 'poisson';
 
 %% parameters determining how the fit is carried out
 weights = [];
-max_iterations = 100;
+max_iterations = 20;
 model_id = 1; %GAUSS_2D
 n_parameters = 5;
 parameters_to_fit = ones(1,n_parameters,'int32')';
@@ -122,147 +122,20 @@ for i = 1:numel(amp)
 end
 
 %% output filename
-filename = 'figure11_MLE_LSE';
-
-%% write .xls file precision
-xlsfilename = [filename '.xls'];
-
-Raw(1:100, 1:100)=deal(NaN);
-xlswrite(xlsfilename,Raw,1)
-
-xlscolumns(1,2) = {'MLE'};
-xlscolumns(1,7) = {'unweighted_LSE'};
-xlscolumns(
-xlscolumns(2,1) = {'SNR'};
-xlswrite(xlsfilename,xlscolumns,1,'A1')
-
-xlscolumns = {'amplitude' 'center x' 'center y' 'width' 'background'};
-xlscolumns = [xlscolumns xlscolumns];
-xlswrite(xlsfilename,xlscolumns,1,'B2')
-
-xlsmat(:,1) = amp;
-
-xlsmat(:,2) = [precision_MLE.a];
-xlsmat(:,3) = [precision_MLE.x0];
-xlsmat(:,4) = [precision_MLE.y0];
-xlsmat(:,5) = [precision_MLE.s];
-xlsmat(:,6) = [precision_MLE.b];
-
-xlsmat(:,7) = [precision_LSE.a];
-xlsmat(:,8) = [precision_LSE.x0];
-xlsmat(:,9) = [precision_LSE.y0];
-xlsmat(:,10) = [precision_LSE.s];
-xlsmat(:,11) = [precision_LSE.b];
-
-xlswrite(xlsfilename,xlsmat,1,'A3')
-clear xlsmat
+filename = 'figure11_wmb_MLE_LSE';
 
 %% write file precision x0
 xlsfilename = [filename '_x0.xls'];
 
-xlscolumns = {'SNR','MLE x0','LSE x0'};
+xlscolumns = {'amplitude','MLE x0','unweighted LSE x0','weighted LSE x0'};
 xlswrite(xlsfilename,xlscolumns,1,'A1')
 
 xlsmat(:,1) = amp;
 xlsmat(:,2) = [precision_MLE.x0];
-xlsmat(:,3) = [precision_LSE.x0];
+xlsmat(:,3) = [precision_unweighted_LSE.x0];
+xlsmat(:,4) = [precision_weighted_LSE.x0];
 
 xlswrite(xlsfilename,xlsmat,1,'A2')
 clear xlsmat
 
-%% write file iterations
-xlsfilename = [filename '_iterations.xls'];
-xlscolumns = {'SNR' 'MLE' 'LSE'};
-xlswrite(xlsfilename,xlscolumns,1,'A1')
-
-xlsmat(:,1) = amp;
-xlsmat(:,2) = mean_iterations_MLE;
-xlsmat(:,3) = mean_iterations_unweighted_LSE;
-
-xlswrite(xlsfilename,xlsmat,1,'A2')
-clear xlsmat
-
-%% plot
- Plot_MLE_LSE_precision(amp, precision_MLE, precision_LSE)
- savefig(filename)
- Plot_MLE_LSE_precision_x0(amp, [precision_MLE.x0], [precision_LSE.x0])
- savefig([filename '_x0'])
- Plot_MLE_LSE_iterations(amp, mean_iterations_MLE, mean_iterations_unweighted_LSE)
- savefig([filename '_iterations'])
-
-end
-
-function [] = Plot_MLE_LSE_precision(amp, precision_MLE, precision_LSE)
-
-figure('Name','MLE vs LSE, snr presision','NumberTitle','off');
-loglog(...
-    amp, [precision_MLE.a], 'red+', ...
-    amp, [precision_MLE.x0], 'blue+', ...
-    amp, [precision_MLE.s], 'green+', ...
-    amp, [precision_MLE.b], 'black+', ...
-    amp, [precision_LSE.a], 'redo', ...
-    amp, [precision_LSE.x0], 'blueo', ...
-    amp, [precision_LSE.s], 'greeno', ...
-    amp, [precision_LSE.b], 'blacko', ...
-    'LineWidth', 4, ...
-    'LineStyle', '-', ...
-    'MarkerSize', 20)
-xlabel('amplitude')
-ylabel('relative standard deviation')
-legend(...
-    'MLE amplitude',...
-    'MLE center',...
-    'MLE width',...
-    'MLE background',...
-    'LSE amplitude',...
-    'LSE center',...
-    'LSE width',...
-    'LSE background')
-xlim([-inf inf])
-grid on;
-box off;
-current_figure = gca;
-current_figure.FontSize = 25;
-current_figure.LineWidth = 4;
-
-end
-
-function [] = Plot_MLE_LSE_precision_x0(amp, precision_MLE_x0, precision_LSE_x0)
-
-figure('Name','MLE vs LSE, snr x center presision','NumberTitle','off');
-loglog(...
-    amp, precision_MLE_x0, 'red+', ...
-    amp, precision_LSE_x0, 'blues', ...
-    'LineWidth', 4, ...
-    'LineStyle', 'none', ...
-    'MarkerSize', 20)
-xlabel('amplitude')
-ylabel('relative standard deviation')
-legend('MLE', 'LSE')
-xlim([-inf inf])
-grid on;
-box off;
-current_figure = gca;
-current_figure.FontSize = 25;
-current_figure.LineWidth = 4;
-end
-
-function [] = Plot_MLE_LSE_iterations(amp, iterations_MLE, iterations_LSE)
-
-figure('Name','MLE vs LSE, snr presision','NumberTitle','off');
-semilogx(...
-    amp, iterations_MLE, 'red+', ...
-    amp, iterations_LSE, 'blueo', ...
-    'LineWidth', 4, ...
-    'LineStyle', '-', ...
-    'MarkerSize', 20)
-xlabel('amplitude')
-ylabel('number of iterations')
-legend('MLE', 'LSE')
-xlim([-inf inf])
-grid on;
-box off;
-current_figure = gca;
-current_figure.FontSize = 25;
-current_figure.LineWidth = 4;
 end
