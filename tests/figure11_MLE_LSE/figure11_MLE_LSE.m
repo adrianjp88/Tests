@@ -3,8 +3,8 @@ function [] = figure11_MLE_LSE()
 %% test data
 
 n_points = 20;
-amp_min = 100;
-amp_max = 10000;
+amp_min = 2;
+amp_max = 20;
 log_min = log10(amp_min);
 log_max = log10(amp_max);
 log_amp = linspace(log_min, log_max, n_points);
@@ -15,13 +15,13 @@ n_fits = 10000;
 
 %% parameters determining the data to be fit
 fit_size = 15;
-gauss_width = 1.0;
-gauss_baseline = 10;
+gauss_width = 2.0;
+gauss_baseline = 2;
 noise = 'poisson';
 
 %% parameters determining how the fit is carried out
 weights = [];
-max_iterations = 20;
+max_iterations = 40;
 model_id = 1; %GAUSS_2D
 n_parameters = 5;
 parameters_to_fit = ones(1,n_parameters,'int32')';
@@ -42,7 +42,9 @@ for i = 1:numel(amp)
                                      gauss_baseline, noise, gauss_pos_offset_max, ...
                                      initial_guess_offset_frac, snr);
     
-
+    % set the weights array
+    weights = 1.0 ./ max(data,1.0);
+                                 
     %% run gpufit MLE
     
     tmp_estimator = 1; 
