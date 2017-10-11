@@ -2,11 +2,11 @@ function [] = figure6_gpufit_cpufit_speed()
 
 %% test parameters
 LogNFitsMin = 0;
-LogNFitsMax = 6;
+LogNFitsMax = 7;
 sampling_factor = 5;
 n_timing_repetitions_cpufit = 5;
 n_timing_repetitions_gpufit = 3;
-skip_cpufit = 0;
+skip_cpufit = 1;
 skip_plot = 1;
 
 %% set up n_fits parameter
