@@ -85,9 +85,9 @@ switch f.likelihood
     case 'gaussian'
         % compute model and model derivatives
         exp_factor = exp(-((x-f.c(1)).^2+(y-f.c(2)).^2)/(2*f.s^2));
-        mi = f.A * exp_factor + f.b;
+        % mi = f.A * exp_factor + f.b;
         dmidxc = f.A * exp_factor .* (x - f.c(1)) /f.s^2;        
-        I = 1 ./ (2 * f.noise_std.^2) * sum(dmidxc(:).^2);
+        I = 1 ./ (f.noise_std.^2) * sum(dmidxc(:).^2);
     case 'poisson'
         n = length(f.A);
         I = zeros(1, n);
